@@ -1,6 +1,6 @@
 import sqlite3 as sql
 from datetime import date
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QMainWindow
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox
 class SQL_SINGLE_INSTANCE:
     def __init__(self) -> None:
         self.connection = sql.connect("FINANCE_DB.db")
@@ -8,6 +8,7 @@ class SQL_SINGLE_INSTANCE:
         self.cursor.execute("CREATE TABLE IF NOT EXISTS transactions (idCategory INTEGER , idOfOther INTEGER, date DATE, money FLOAT, isIncome BOOL)")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS people (idOfOther INTEGER PRIMARY KEY AUTOINCREMENT, firstName varchar(255), lastName varchar(255))")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS categories (idCategory INTEGER PRIMARY KEY AUTOINCREMENT, name varchar(255), RGB varchar(11))")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS settings (y_len INTEGER, x_len INTEGER, rec_num INTEGER)")
         self.connection.commit()
 
 class transaction():
@@ -33,11 +34,11 @@ class category():
         self.name = name
         self.rgb = rgb
 
-class mainWind(SQL_SINGLE_INSTANCE):
+class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
         super().__init__()
         self.filters = dict()
-        self.shownContent = tuple()
+        self.shownContent = list()
 
     def create_new_category(self, category: category) -> None:
         self.cursor.execute(f"INSERT INTO categories VALUES (NULL, ?, ?)", (category.name, category.rgb))
@@ -51,9 +52,9 @@ class mainWind(SQL_SINGLE_INSTANCE):
         self.cursor.execute(f"INSERT INTO transactions VALUES (?, ?, ?, ?, ?)", (transaction.idCategory, transaction.idOfOther, transaction.date, transaction.money, transaction.isIncome))
         self.connection.commit()
         
-    def show_table(self, filt: dict) -> None:
-        command = "SELECT people.firstName, people.lastName, categories.name, transactions.money, transactions.date FROM transactions FULL JOIN categories, people ON (transactions.idCategory = categories.idCategory AND transactions.idOfOther = people.idOfOther)"
-        self.filters = filt
+    def show_table(self, filters: dict, orderFilters: dict,  limit: int) -> list:
+        command = "SELECT people.firstName, people.lastName, categories.name, transactions.money, transactions.date FROM transactions FULL JOIN categories, people ON (transactions.idCategory = categories.idCategory AND transactions.idOfOther = people.idOfOther"
+        self.filters = filters
         if self.filters == dict():
             pass
         else:
@@ -65,7 +66,27 @@ class mainWind(SQL_SINGLE_INSTANCE):
                         command += " OR "
                 if key != len(list(self.filters.keys()))-1:
                     command += " AND "
+        command += f" LIMIT {limit}"
         print(command)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
-        print(self.shownContent)
+        return self.shownContent
+
+class Program(CORE, QWidget):
+    def __init__(self, parent=None):
+        super().__init__()
+        QWidget.__init__(self, parent)
+        self.setWindowTitle('Finance Organizer')
+        if self.cursor.execute("SELECT * FROM settings").fetchall() == []:
+            self.cursor.execute("INSERT INTO settings VALUES (?, ?, ?)", [1000, 1000, 20])
+            self.connection.commit()
+        self.cursor.execute("SELECT * FROM settings")
+        placeholder = list(self.cursor.fetchall()[0])
+        self.settings = dict()
+        self.settings["width"] = placeholder[0]
+        self.settings["height"] = placeholder[1]
+        self.settings["rowNumber"] = placeholder[2]
+        self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
+
+
+        self.show()

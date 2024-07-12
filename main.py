@@ -1,6 +1,9 @@
-from classes import transaction, person, category, mainWind
+from classes import transaction, person, category, CORE, Program
 from datetime import date, datetime
+from PyQt5.QtWidgets import QWidget, QApplication
+from sys import argv, exit
 
 if __name__ == "__main__":
-    program = mainWind()
-    program.show_table(dict())
+    app = QApplication(argv)
+    widget = Program()
+    exit(app.exec_())

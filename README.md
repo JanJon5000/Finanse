@@ -1,1 +1,1 @@
-# Finanse
+# Finance Organizer
