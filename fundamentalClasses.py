@@ -6,7 +6,7 @@ class SQL_SINGLE_INSTANCE:
         self.connection = sql.connect("FINANCE_DB.db")
         self.cursor = self.connection.cursor()
         self.cursor.execute("CREATE TABLE IF NOT EXISTS transactions (idCategory INTEGER , idOfOther INTEGER, date DATE, money FLOAT, isIncome BOOL)")
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS people (idOfOther INTEGER PRIMARY KEY AUTOINCREMENT, firstName varchar(255), lastName varchar(255))")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS people (idOfOther INTEGER PRIMARY KEY AUTOINCREMENT, personName varchar(255))")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS categories (idCategory INTEGER PRIMARY KEY AUTOINCREMENT, name varchar(255), RGB varchar(11))")
         self.cursor.execute("CREATE TABLE IF NOT EXISTS settings (height INTEGER, width INTEGER, recordsShown INTEGER)")
         self.connection.commit()
@@ -21,11 +21,10 @@ class transaction():
         self.isIncome = income
 
 class person():
-    def __init__(self, idoftheother: int, firstname: str, lastname: str) -> None:
+    def __init__(self, idoftheother: int, personName: str) -> None:
         super().__init__()
         self.idOfOther = idoftheother
-        self.firstName = firstname
-        self.lastName = lastname
+        self.personName = personName
 
 class category():
     def __init__(self, idcategry: int, name: str, rgb: str) -> None:

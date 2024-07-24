@@ -2,7 +2,7 @@ import sqlite3 as sql
 from datetime import date
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
-from customPYQT5Objects import QMultiComboBox, QCustomWidget
+from customPYQT5Objects import QCustomWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -15,7 +15,7 @@ class CORE(SQL_SINGLE_INSTANCE):
         self.connection.commit()
     
     def create_new_person(self, person: person) -> None:
-        self.cursor.execute(f"INSERT INTO people VALUES (NULL, ?, ?)", (person.firstName, person.lastName))
+        self.cursor.execute(f"INSERT INTO people VALUES (NULL, ?)", (person.personName))
         self.connection.commit()
 
     def create_new_transaction(self, transaction: transaction) -> None:
@@ -23,7 +23,7 @@ class CORE(SQL_SINGLE_INSTANCE):
         self.connection.commit()
         
     def show_table(self, filters: dict, orderFilters: list,  limit: int) -> None:
-        command = "SELECT people.firstName, people.lastName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
+        command = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         self.filters = filters
         self.orderFilters = orderFilters
         if self.filters == dict():
@@ -98,16 +98,15 @@ class Program(CORE, QWidget):
         self.g.addWidget(QLabel("wykres", self), 0, 1)
         # QCombo boxes which the user can use in order to filter the results
         # 1
-        self.cursor.execute("SELECT firstName FROM people WHERE 1=1")
+        self.cursor.execute("SELECT personName FROM people WHERE 1=1")
         qListValues = self.cursor.fetchall()
-        self.nameMultiComboBox = QCustomWidget(self)
+        self.nameMultiComboBox = QCustomWidget(self, qListValues, "Imie:")
         self.g.addWidget(self.nameMultiComboBox, 1, 0)
         # 2
         
-        self.g.addWidget(QLabel("nazwisko", self), 1, 1)
-        self.g.addWidget(QLabel("kategoria", self), 1, 2)
-        self.g.addWidget(QLabel("kasa", self), 1, 3)
-        self.g.addWidget(QLabel("data", self), 1, 4)
+        self.g.addWidget(QLabel("kategoria", self), 1, 1)
+        self.g.addWidget(QLabel("kasa", self), 1, 2)
+        self.g.addWidget(QLabel("data", self), 1, 3)
 
         # filtered data
         counter = 2
