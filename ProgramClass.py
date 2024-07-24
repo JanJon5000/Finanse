@@ -1,38 +1,8 @@
 import sqlite3 as sql
 from datetime import date
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox
-class SQL_SINGLE_INSTANCE:
-    def __init__(self) -> None:
-        self.connection = sql.connect("FINANCE_DB.db")
-        self.cursor = self.connection.cursor()
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS transactions (idCategory INTEGER , idOfOther INTEGER, date DATE, money FLOAT, isIncome BOOL)")
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS people (idOfOther INTEGER PRIMARY KEY AUTOINCREMENT, firstName varchar(255), lastName varchar(255))")
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS categories (idCategory INTEGER PRIMARY KEY AUTOINCREMENT, name varchar(255), RGB varchar(11))")
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS settings (height INTEGER, width INTEGER, recordsShown INTEGER)")
-        self.connection.commit()
-
-class transaction():
-    def __init__(self, date: date, money: float, idcategry: int, income: bool, idoftheother: int) -> None:
-        super().__init__()
-        self.idCategory = idcategry
-        self.idOfOther = idoftheother
-        self.date = date
-        self.money = money
-        self.isIncome = income
-
-class person():
-    def __init__(self, idoftheother: int, firstname: str, lastname: str) -> None:
-        super().__init__()
-        self.idOfOther = idoftheother
-        self.firstName = firstname
-        self.lastName = lastname
-
-class category():
-    def __init__(self, idcategry: int, name: str, rgb: str) -> None:
-        super().__init__()
-        self.idCategory = idcategry
-        self.name = name
-        self.rgb = rgb
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
+from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
+from customPYQT5Objects import QMultiComboBox, QCustomWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -100,41 +70,66 @@ class Program(CORE, QWidget):
         self.settings["height"] = placeholder[0]
         self.settings["width"] = placeholder[1]
         self.settings["rowNumber"] = placeholder[2]
-
-        #declaring functions in advance    
+        self.orderFilters = []
         #setting the layout to grid
-        g = QGridLayout()
+        self.g = QGridLayout()
+        self.populate_grid(self.g)
+        
+        self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
+        self.show()
+
+    #function cleaning the grid
+    def clear_layout(self, layout):
+        if layout is not None:
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget() is not None:
+                    child.widget().deleteLater()
+                elif child.layout() is not None:
+                    self.clear_layout(child.layout())
+    
+    def populate_grid(self, g: QGridLayout) -> None:
+        # QlineEdit with number of records to be shown
         self.recordBox = QLineEdit(self)
-        self.recordBox.setMaxLength(3)
+        self.recordBox.setMaxLength(2)
         self.recordBox.textChanged.connect(self.change_record_num)
-        g.addWidget(self.recordBox, 0, 0)
-        g.addWidget(QLabel("wykres", self), 0, 1)
-        g.addWidget(QLabel("imie", self), 1, 0)
-        g.addWidget(QLabel("nazwisko", self), 1, 1)
-        g.addWidget(QLabel("kategoria", self), 1, 2)
-        g.addWidget(QLabel("kasa", self), 1, 3)
-        g.addWidget(QLabel("data", self), 1, 4)
+        self.g.addWidget(self.recordBox, 0, 0)
+        # Button creating a diagram out of wanted records
+        self.g.addWidget(QLabel("wykres", self), 0, 1)
+        # QCombo boxes which the user can use in order to filter the results
+        # 1
+        self.cursor.execute("SELECT firstName FROM people WHERE 1=1")
+        qListValues = self.cursor.fetchall()
+        self.nameMultiComboBox = QCustomWidget(self)
+        self.g.addWidget(self.nameMultiComboBox, 1, 0)
+        # 2
+        
+        self.g.addWidget(QLabel("nazwisko", self), 1, 1)
+        self.g.addWidget(QLabel("kategoria", self), 1, 2)
+        self.g.addWidget(QLabel("kasa", self), 1, 3)
+        self.g.addWidget(QLabel("data", self), 1, 4)
+
+        # filtered data
         counter = 2
-        self.show_table({}, [], self.settings['rowNumber'])
+        self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         for record in self.shownContent:
             for i in range(len(record)):
                 g.addWidget(QLabel(str(record[i]), self), counter, i)
             counter += 1
         self.setLayout(g)
-        #window type functions, and code lines
-        
-        self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
-        self.show()
 
-    #functions controlling all the onclicks, textchanged and so on
-    
+    def refresh(self) -> None:
+        self.clear_layout(self.g)
+        self.populate_grid(self.g)
+        self.update()
+
     def change_record_num(self, text) -> None:
         text = self.recordBox.text()
         try:
             text = int(text)
             self.settings['rowNumber'] = text
             self.cursor.execute("DELETE FROM settings WHERE 1=1")
-            self.cursor.execute("INSERT INTO settings VALUES (?, ?, ?)", (self.settings['height'], self.settings['width'], num))
+            self.cursor.execute("INSERT INTO settings VALUES (?, ?, ?)", (self.settings['height'], self.settings['width'], text))
             self.connection.commit()
         except:
             pass
@@ -150,4 +145,4 @@ class Program(CORE, QWidget):
         finally:
             self.cursor.close()
             self.connection.close()
-        super().resizeEvent(event)
+        super().closeEvent(event)
