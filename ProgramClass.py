@@ -2,25 +2,13 @@ import sqlite3 as sql
 from datetime import date
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
-from customPYQT5Objects import QCustomWidget
+from customPYQT5Objects import QCustomFilterWidget, QAddBoxWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
         super().__init__()
         self.filters = dict()
         self.shownContent = list()
-
-    def create_new_category(self, category: category) -> None:
-        self.cursor.execute(f"INSERT INTO categories VALUES (NULL, ?, ?)", (category.name, category.rgb))
-        self.connection.commit()
-    
-    def create_new_person(self, person: person) -> None:
-        self.cursor.execute(f"INSERT INTO people VALUES (NULL, ?)", (person.personName))
-        self.connection.commit()
-
-    def create_new_transaction(self, transaction: transaction) -> None:
-        self.cursor.execute(f"INSERT INTO transactions VALUES (?, ?, ?, ?, ?)", (transaction.idCategory, transaction.idOfOther, transaction.date, transaction.money, transaction.isIncome))
-        self.connection.commit()
         
     def show_table(self, filters: dict, orderFilters: list,  limit: int) -> None:
         command = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
@@ -89,32 +77,38 @@ class Program(CORE, QWidget):
                     self.clear_layout(child.layout())
     
     def populate_grid(self, g: QGridLayout) -> None:
+        # custom widget by which the user can add a transaction to his history
+        self.adder = QAddBoxWidget()
+        g.addWidget(self.adder, 0, 0)
         # QlineEdit with number of records to be shown
         self.recordBox = QLineEdit(self)
         self.recordBox.setMaxLength(2)
         self.recordBox.textChanged.connect(self.change_record_num)
-        self.g.addWidget(self.recordBox, 0, 0)
+        self.g.addWidget(self.recordBox, 1, 0)
         # Button creating a diagram out of wanted records
-        self.g.addWidget(QLabel("wykres", self), 0, 1)
+        self.g.addWidget(QLabel("wykres", self), 1, 1)
         # QCombo boxes which the user can use in order to filter the results
         # 1
         self.cursor.execute("SELECT personName FROM people WHERE 1=1")
         qListValues = self.cursor.fetchall()
-        self.nameMultiComboBox = QCustomWidget(self, qListValues, "Imie:")
-        self.g.addWidget(self.nameMultiComboBox, 1, 0)
+        self.nameMultiComboBox = QCustomFilterWidget(self, qListValues, "Imie:")
+        self.g.addWidget(self.nameMultiComboBox, 2, 0)
         # 2
         
-        self.g.addWidget(QLabel("kategoria", self), 1, 1)
-        self.g.addWidget(QLabel("kasa", self), 1, 2)
-        self.g.addWidget(QLabel("data", self), 1, 3)
+        self.g.addWidget(QLabel("kategoria", self), 2, 1)
+        self.g.addWidget(QLabel("kasa", self), 2, 2)
+        self.g.addWidget(QLabel("data", self), 2, 3)
 
+
+        
         # filtered data
-        counter = 2
+        counter = 3
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         for record in self.shownContent:
             for i in range(len(record)):
                 g.addWidget(QLabel(str(record[i]), self), counter, i)
             counter += 1
+
         self.setLayout(g)
 
     def refresh(self) -> None:
