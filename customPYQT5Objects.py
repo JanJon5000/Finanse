@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QStringListModel
+from PyQt5.QtCore import Qt, QStringListModel, QLocale
 from PyQt5.QtGui import QMouseEvent
 from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter
 from fundamentalClasses import SQL_SINGLE_INSTANCE
@@ -36,14 +36,17 @@ class QAddBoxWidget(QWidget, SQL_SINGLE_INSTANCE):
         self.populateGrid()
     
     def populateGrid(self):
+        # Constructors of the objects
         self.accessibleLayout = QGridLayout(self)
         self.qButtonPart = QPushButton("dodaj", self)
         self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota', 'przychód', 'data')]
         self.qInteractiveComps = [QLineEdit(self), QLineEdit(self), QLineEdit(self), QCheckBox(self), QCalendarWidget(self)]
 
         # setup of the interactive elements in the widget:
+
+        ########### QLINEEDITS
         # making a list of completers for every QlineEdit box
-        # suggestion lists:
+        # suggestion list:
         self.suggestions = []
         for (value, table) in [('personName', 'people'), ('name', 'categories')]:
             self.cursor.execute(f"SELECT {value} FROM {table} WHERE 1=1")
@@ -57,6 +60,12 @@ class QAddBoxWidget(QWidget, SQL_SINGLE_INSTANCE):
             self.completers[i].setCaseSensitivity(False)
             self.qInteractiveComps[i].setCompleter(self.completers[i])
 
+        ########### QBUTTON
+        self.qButtonPart.clicked.connect(self.add_transaction)
+        ########### QCALLENDAR
+        self.qInteractiveComps[-1].setGridVisible(True)
+        self.qInteractiveComps[-1].setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+        self.qInteractiveComps[-1].setLocale(QLocale(QLocale.Polish))
         # setup of the layout        
         for i in range(4):
             self.accessibleLayout.addWidget(self.qLabels[i], i, 0)  
@@ -66,6 +75,9 @@ class QAddBoxWidget(QWidget, SQL_SINGLE_INSTANCE):
 
         self.accessibleLayout.addWidget(self.qButtonPart, 4, 0, 1, 5)
         self.setLayout(self.accessibleLayout)
+
+    def add_transaction(self): 
+        print('test')
 
     def clear_layout(self, layout):
         if layout is not None:
