@@ -61,7 +61,7 @@ class Program(CORE, QWidget):
         self.orderFilters = []
         #setting the layout to grid
         self.g = QGridLayout()
-        self.populate_grid(self.g)
+        self.populate_grid()
         
         self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
         self.show()
@@ -76,10 +76,10 @@ class Program(CORE, QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
     
-    def populate_grid(self, g: QGridLayout) -> None:
+    def populate_grid(self) -> None:
         # custom widget by which the user can add a transaction to his history
         self.adder = QAddBoxWidget()
-        g.addWidget(self.adder, 0, 0)
+        self.g.addWidget(self.adder, 0, 0)
         # QlineEdit with number of records to be shown
         self.recordBox = QLineEdit(self)
         self.recordBox.setMaxLength(2)
@@ -94,9 +94,10 @@ class Program(CORE, QWidget):
         self.nameMultiComboBox = QCustomFilterWidget(self, qListValues, "Imie:")
         self.g.addWidget(self.nameMultiComboBox, 2, 0)
         # 2
-        
         self.g.addWidget(QLabel("kategoria", self), 2, 1)
+        # 3
         self.g.addWidget(QLabel("kasa", self), 2, 2)
+        # 4
         self.g.addWidget(QLabel("data", self), 2, 3)
 
 
@@ -106,14 +107,14 @@ class Program(CORE, QWidget):
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         for record in self.shownContent:
             for i in range(len(record)):
-                g.addWidget(QLabel(str(record[i]), self), counter, i)
+                self.g.addWidget(QLabel(str(record[i]), self), counter, i)
             counter += 1
 
-        self.setLayout(g)
+        self.setLayout(self.g)
 
     def refresh(self) -> None:
         self.clear_layout(self.g)
-        self.populate_grid(self.g)
+        self.populate_grid()
         self.update()
 
     def change_record_num(self, text) -> None:
