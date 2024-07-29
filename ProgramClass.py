@@ -94,13 +94,14 @@ class Program(CORE, QWidget):
         self.nameMultiComboBox = QCustomFilterWidget(self, qListValues, "Imie:")
         self.g.addWidget(self.nameMultiComboBox, 2, 0)
         # 2
-        self.g.addWidget(QLabel("kategoria", self), 2, 1)
+        self.cursor.execute("SELECT name FROM categories WHERE 1=1")
+        qListValues = self.cursor.fetchall()
+        self.categoryMultiComboBox = QCustomFilterWidget(self, qListValues, "Kategoria:")
+        self.g.addWidget(self.categoryMultiComboBox, 2, 1)
         # 3
         self.g.addWidget(QLabel("kasa", self), 2, 2)
         # 4
         self.g.addWidget(QLabel("data", self), 2, 3)
-
-
         
         # filtered data
         counter = 3

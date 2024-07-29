@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QStringListModel, QLocale
 from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter
+from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog
 from fundamentalClasses import SQL_SINGLE_INSTANCE
 import traceback
 
@@ -27,7 +27,7 @@ class QCustomFilterWidget(QWidget):
 
         self.setLayout(self.accesibleLayout)
 
-class QAddBoxWidget(QWidget, SQL_SINGLE_INSTANCE):
+class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
     def __init__(self, parent=None) -> None:
         super().__init__()
         QWidget.__init__(self, parent)
@@ -61,12 +61,14 @@ class QAddBoxWidget(QWidget, SQL_SINGLE_INSTANCE):
             self.qInteractiveComps[i].setCompleter(self.completers[i])
 
         ########### QBUTTON
-        self.qButtonPart.clicked.connect(self.add_transaction)
+        self.qButtonPart.clicked.connect(self.on_click_button)
         ########### QCALLENDAR
         self.qInteractiveComps[-1].setGridVisible(True)
         self.qInteractiveComps[-1].setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         self.qInteractiveComps[-1].setLocale(QLocale(QLocale.Polish))
-        # setup of the layout        
+        with open('/Users/jan/VSCODE/Finanse/callendar-stylesheet.css', 'r') as file:
+            self.qInteractiveComps[-1].setStyleSheet(file.read())
+        # setup of the layout
         for i in range(4):
             self.accessibleLayout.addWidget(self.qLabels[i], i, 0)  
             self.accessibleLayout.addWidget(self.qInteractiveComps[i], i, 1)
@@ -76,7 +78,7 @@ class QAddBoxWidget(QWidget, SQL_SINGLE_INSTANCE):
         self.accessibleLayout.addWidget(self.qButtonPart, 4, 0, 1, 5)
         self.setLayout(self.accessibleLayout)
 
-    def add_transaction(self): 
+    def on_click_button(self):
         print('test')
 
     def clear_layout(self, layout):

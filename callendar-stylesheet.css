@@ -1,0 +1,84 @@
+QCalendarWidget QWidget { 
+    background-color: #121212;
+    color: #E0E0E0;
+}
+
+QCalendarWidget QToolButton {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border: none;
+    width: 70px;
+    height: 25px;
+}
+
+QCalendarWidget QToolButton::hover {
+    background-color: #333333;
+}
+
+QCalendarWidget QToolButton#qt_calendar_prevmonth {
+    qproperty-icon: url(/Users/jan/VSCODE/Finanse/left-arrow.png);
+    width: 40px; 
+    height: 40px;
+    padding: 0px; /* Usuń wypełnienie */
+    border: none; /* Usuń obramowanie */
+    background: transparent; /* Tło przezroczyste */
+}
+
+QCalendarWidget QToolButton#qt_calendar_nextmonth {
+    qproperty-icon: url(/Users/jan/VSCODE/Finanse/right-arrow.png);
+    width: 40px; 
+    height: 40px;
+    padding: 0px; /* Usuń wypełnienie */
+    border: none; /* Usuń obramowanie */
+    background: transparent; /* Tło przezroczyste */
+}
+
+QCalendarWidget QMenu {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border: 1px solid #666666;
+}
+
+QCalendarWidget QSpinBox {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border: 1px solid #666666;
+    width: 50px;
+}
+
+QCalendarWidget QSpinBox::up-button, QCalendarWidget QSpinBox::down-button {
+    background-color: #333333;
+}
+
+QCalendarWidget QSpinBox::up-button:hover, QCalendarWidget QSpinBox::down-button:hover {
+    background-color: #555555;
+}
+
+QCalendarWidget QSpinBox::up-arrow, QCalendarWidget QSpinBox::down-arrow {
+    border: none;
+}
+
+QCalendarWidget QAbstractItemView:enabled {
+    background-color: #121212;
+    selection-background-color: #6200EE;
+    selection-color: #FFFFFF;
+    color: #E0E0E0;
+}
+
+QCalendarWidget QAbstractItemView:disabled {
+    color: #666666;
+}
+
+QCalendarWidget QTableView {
+    gridline-color: #333333;
+}
+
+QCalendarWidget QHeaderView::section {
+    background-color: #1E1E1E;
+    color: #E0E0E0;
+    border: none;
+}
+
+QCalendarWidget QToolButton#qt_calendar_monthbutton::menu-indicator {
+    image: none;
+}
