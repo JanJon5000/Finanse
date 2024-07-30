@@ -1,5 +1,6 @@
 import sqlite3 as sql
 from datetime import date
+from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from customPYQT5Objects import QCustomFilterWidget, QAddBoxWidget
@@ -78,8 +79,10 @@ class Program(CORE, QWidget):
     
     def populate_grid(self) -> None:
         # custom widget by which the user can add a transaction to his history
-        self.adder = QAddBoxWidget()
-        self.g.addWidget(self.adder, 0, 0)
+        self.adderButton = QPushButton('dodaj tranzakcje', self)
+        self.adderButton.clicked.connect(self.showAdderDialog)
+        self.g.addWidget(self.adderButton, 0, 0)
+
         # QlineEdit with number of records to be shown
         self.recordBox = QLineEdit(self)
         self.recordBox.setMaxLength(2)
@@ -87,7 +90,7 @@ class Program(CORE, QWidget):
         self.g.addWidget(self.recordBox, 1, 0)
         # Button creating a diagram out of wanted records
         self.g.addWidget(QLabel("wykres", self), 1, 1)
-        # QCombo boxes which the user can use in order to filter the results
+        # QComboboxes which the user can use in order to filter the results
         # 1
         self.cursor.execute("SELECT personName FROM people WHERE 1=1")
         qListValues = self.cursor.fetchall()
@@ -141,3 +144,20 @@ class Program(CORE, QWidget):
             self.cursor.close()
             self.connection.close()
         super().closeEvent(event)
+    
+    def showAdderDialog(self):
+        self.dialog = QAddBoxWidget(self)
+        button_geometry = self.adderButton.geometry()
+        global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
+        self.dialog.setMinimumSize(1, 1)
+        self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.height(), 1, 1))
+        self.dialog.show()
+
+        self.animation = QPropertyAnimation(self.dialog, b"size")
+        self.animation.setDuration(300)
+        self.animation.setStartValue(QSize(1, 1))
+        self.animation.setEndValue(QSize(1000, 300))
+        self.animation.start()
+        self.dialog.exec_()
+
+        

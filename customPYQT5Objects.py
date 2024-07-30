@@ -30,7 +30,7 @@ class QCustomFilterWidget(QWidget):
 class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
     def __init__(self, parent=None) -> None:
         super().__init__()
-        QWidget.__init__(self, parent)
+        QDialog.__init__(self, parent)
         SQL_SINGLE_INSTANCE.__init__(self)
         
         self.populateGrid()
@@ -38,8 +38,9 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
     def populateGrid(self):
         # Constructors of the objects
         self.accessibleLayout = QGridLayout(self)
+        self.innerLayout = QGridLayout(self)
         self.qButtonPart = QPushButton("dodaj", self)
-        self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota', 'przychód', 'data')]
+        self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota', 'przychód')]
         self.qInteractiveComps = [QLineEdit(self), QLineEdit(self), QLineEdit(self), QCheckBox(self), QCalendarWidget(self)]
 
         # setup of the interactive elements in the widget:
@@ -68,14 +69,21 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.qInteractiveComps[-1].setLocale(QLocale(QLocale.Polish))
         with open('/Users/jan/VSCODE/Finanse/callendar-stylesheet.css', 'r') as file:
             self.qInteractiveComps[-1].setStyleSheet(file.read())
-        # setup of the layout
+        # setup inner of the layout
         for i in range(4):
-            self.accessibleLayout.addWidget(self.qLabels[i], i, 0)  
-            self.accessibleLayout.addWidget(self.qInteractiveComps[i], i, 1)
-        self.accessibleLayout.addWidget(self.qLabels[4], 0, 2)
-        self.accessibleLayout.addWidget(self.qInteractiveComps[4], 1, 2, 1, 4)
-
-        self.accessibleLayout.addWidget(self.qButtonPart, 4, 0, 1, 5)
+            self.innerLayout.addWidget(self.qLabels[i], i, 0)  
+            self.innerLayout.addWidget(self.qInteractiveComps[i], i, 1)
+        self.innerLayout.setContentsMargins(5, 5, 5, 5)
+        self.innerLayout.setHorizontalSpacing(5)
+        self.innerLayout.setVerticalSpacing(5)
+        # big inner widget with smaller elements
+        self.innerWidget = QWidget()
+        self.innerWidget.setLayout(self.innerLayout)
+        # setup of the outer layout
+        self.accessibleLayout.addWidget(self.innerWidget, 0, 0)
+        self.accessibleLayout.addWidget(self.qInteractiveComps[-1], 0, 1)
+        self.accessibleLayout.addWidget(self.qButtonPart, 1, 0, 1, 2)
+        
         self.setLayout(self.accessibleLayout)
 
     def on_click_button(self):

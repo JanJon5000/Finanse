@@ -1,6 +1,8 @@
 import sqlite3 as sql
 from datetime import date
 
+# classes which provide better handling of data from the database (data in the database has exact same syntax)
+# objects with every atribute of a transaction from the database...
 class transaction():
     def __init__(self, date: date, money: float, idcategry: int, income: bool, idoftheother: int) -> None:
         super().__init__()
@@ -10,12 +12,14 @@ class transaction():
         self.money = money
         self.isIncome = income
 
+# ...with every atribute of the person from people table...
 class person():
     def __init__(self, idoftheother: int, personName: str) -> None:
         super().__init__()
         self.idOfOther = idoftheother
         self.personName = personName
 
+# ...and with every atribute of the category from categories table.
 class category():
     def __init__(self, idcategry: int, name: str, rgb: str) -> None:
         super().__init__()
@@ -23,6 +27,7 @@ class category():
         self.name = name
         self.rgb = rgb
 
+# a handle for other classes to contact with the db
 class SQL_SINGLE_INSTANCE:
     def __init__(self) -> None:
         self.connection = sql.connect("FINANCE_DB.db")
