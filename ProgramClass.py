@@ -151,7 +151,6 @@ class Program(CORE, QWidget):
         global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
         self.dialog.setMinimumSize(1, 1)
         self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.height(), 1, 1))
-        self.dialog.show()
 
         self.animation = QPropertyAnimation(self.dialog, b"size")
         self.animation.setDuration(300)

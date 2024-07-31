@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, QStringListModel, QLocale
+from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal
 from PyQt5.QtGui import QMouseEvent
 from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog
 from fundamentalClasses import SQL_SINGLE_INSTANCE
@@ -32,7 +32,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         super().__init__()
         QDialog.__init__(self, parent)
         SQL_SINGLE_INSTANCE.__init__(self)
-        
+        self.closed = pyqtSignal()
         self.populateGrid()
     
     def populateGrid(self):
@@ -76,7 +76,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.innerLayout.setContentsMargins(5, 5, 5, 5)
         self.innerLayout.setHorizontalSpacing(5)
         self.innerLayout.setVerticalSpacing(5)
-        # big inner widget with smaller elements
+        # inner widget with smaller elements
         self.innerWidget = QWidget()
         self.innerWidget.setLayout(self.innerLayout)
         # setup of the outer layout
@@ -87,7 +87,18 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.setLayout(self.accessibleLayout)
 
     def on_click_button(self):
-        print('test')
+        data = []
+        for i in range(len(self.qInteractiveComps)):
+            match self.qInteractiveComps[i]:
+                case QLineEdit():
+                    data.append(self.qInteractiveComps[i].text())
+                case QCalendarWidget():
+                    data.append(self.qInteractiveComps[i].selectedDate())
+                case QCheckBox():
+                    data.append(self.qInteractiveComps[i].isChecked())
+        if(data[0] != '' and data[1] != '' and data[2] != ''):
+            selectData = {"money":float(data[2]), 'isIncome':bool(data[3])}
+            print(selectData)
 
     def clear_layout(self, layout):
         if layout is not None:
