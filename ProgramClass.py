@@ -94,16 +94,18 @@ class Program(CORE, QWidget):
         # 1
         self.cursor.execute("SELECT personName FROM people WHERE 1=1")
         qListValues = self.cursor.fetchall()
+        qListValues = [''.join(tpl) for tpl in qListValues]
         self.nameMultiComboBox = QCustomFilterWidget(self, qListValues, "Imie:")
         self.g.addWidget(self.nameMultiComboBox, 2, 0)
         # 2
         self.cursor.execute("SELECT name FROM categories WHERE 1=1")
         qListValues = self.cursor.fetchall()
+        qListValues = [''.join(tpl) for tpl in qListValues]
         self.categoryMultiComboBox = QCustomFilterWidget(self, qListValues, "Kategoria:")
         self.g.addWidget(self.categoryMultiComboBox, 2, 1)
-        # 3
+        # SOON a widget with a scroll bar to choose money range
         self.g.addWidget(QLabel("kasa", self), 2, 2)
-        # 4
+        # SOON a callendar/scroll bar to choose date range
         self.g.addWidget(QLabel("data", self), 2, 3)
         
         # filtered data

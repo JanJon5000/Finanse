@@ -1,8 +1,10 @@
-from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal
+from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal, QDate
 from PyQt5.QtGui import QMouseEvent
 from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog
-from fundamentalClasses import SQL_SINGLE_INSTANCE
+from fundamentalClasses import SQL_SINGLE_INSTANCE, person, transaction, category
 import traceback
+from datetime import date
+from random import randint
 
 class QCustomFilterWidget(QWidget):
     def __init__(self, parent = None, qListValues = [], name = "") -> None:
@@ -48,18 +50,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         ########### QLINEEDITS
         # making a list of completers for every QlineEdit box
         # suggestion list:
-        self.suggestions = []
-        for (value, table) in [('personName', 'people'), ('name', 'categories')]:
-            self.cursor.execute(f"SELECT {value} FROM {table} WHERE 1=1")
-            data = self.cursor.fetchall()
-            self.suggestions.append(data)
-        # models with ques on what categories/people there are in the database
-        self.models = [QStringListModel(self.suggestions[i], self) for i in range(len(self.suggestions))]
-        # compeleters - objects giving hints in the qlineedit boxes
-        self.completers = [QCompleter(self.models[i], self) for i in range(len(self.models))]
-        for i in range(len(self.completers)): 
-            self.completers[i].setCaseSensitivity(False)
-            self.qInteractiveComps[i].setCompleter(self.completers[i])
+        self.setCompleters()
 
         ########### QBUTTON
         self.qButtonPart.clicked.connect(self.on_click_button)
@@ -96,20 +87,65 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
                     data.append(self.qInteractiveComps[i].selectedDate())
                 case QCheckBox():
                     data.append(self.qInteractiveComps[i].isChecked())
-        if(data[0] != '' and data[1] != '' and data[2] != ''):
-            selectData = {"money":float(data[2]), 'isIncome':bool(data[3])}
-            print(selectData)
+        # checking if the data was properly written
+        if data[0] != '' and data[1] != '' and data[2] != '':
+            code_lines = [
+                "if float(data[2]) != 0.0: selectedData['money'] = float(data[2])",
+                "selectedData['isIncome'] = data[3]",
+                "selectedData['date'] = date(data[-1].year(), data[-1].month(), data[-1].day())"
+            ]
+            selectedData = dict()
+            for line in code_lines:
+                try:
+                    exec(line)
+                except:
+                    pass
+            # trying to find the ids of category and the other person in the transaction
+            # if non existant, program adds them
+            forList = [
+                (f"SELECT idOfOther FROM people WHERE personName = '{data[0]}'", 
+                 "self.create_new_person(person(None, data[0]))", 
+                 'idOfOther'),
+                (f"SELECT idCategory FROM categories WHERE name = '{data[1]}'", 
+                 "self.create_new_category(category(None, data[1], str(randint(0,255)) + ',' + str(randint(0,255)) + ',' + str(randint(0,255))))",
+                 'idCategory')
+            ]
+            for (command, objectExec, sqlIndex) in forList:
+                self.cursor.execute(command)
+                placeholder = self.cursor.fetchall()
+                if len(placeholder) < 1:
+                    exec(objectExec)
+                self.cursor.execute(command)
+                selectedData[sqlIndex] = self.cursor.fetchall()[0][0]
+            if selectedData['isIncome']:
+                minus = 1
+            else:
+                minus = -1  
+            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], minus*selectedData['money'], selectedData['idOfOther']))
+            self.refresh()
 
-    def clear_layout(self, layout):
-        if layout is not None:
-            while layout.count():
-                child = layout.takeAt(0)
-                if child.widget() is not None:
-                    child.widget().deleteLater()
-                elif child.layout() is not None:
-                    self.clear_layout(child.layout())
-    
+    def setCompleters(self) -> None:
+        self.suggestions = []
+        for (value, table) in [('personName', 'people'), ('name', 'categories')]:
+            self.cursor.execute(f"SELECT {value} FROM {table} WHERE 1=1")
+            data = self.cursor.fetchall()
+            self.suggestions.append([''.join(tpl) for tpl in data])
+        # models with ques on what categories/people there are in the database
+        self.models = [QStringListModel(self.suggestions[i], self) for i in range(len(self.suggestions))]
+        # compeleters - objects giving hints in the qlineedit boxes
+        self.completers = [QCompleter(self.models[i], self) for i in range(len(self.models))]
+        for i in range(len(self.completers)): 
+            self.completers[i].setCaseSensitivity(False)
+            self.qInteractiveComps[i].setCompleter(self.completers[i])
+            self.qInteractiveComps[i].clear()
+        self.qInteractiveComps[-3].clear()
+        self.qInteractiveComps[-2].setChecked(False)
+
+
     def refresh(self):
-        self.clear_layout(self.accessibleLayout)
-        self.populateGrid()
+        self.setCompleters()
         self.update()
+    
+    def closeEvent(self, event) -> None:
+        self.closed.emit()
+        super().closeEvent(event)

@@ -43,7 +43,7 @@ class SQL_SINGLE_INSTANCE:
         self.connection.commit()
     
     def create_new_person(self, person: person) -> None:
-        self.cursor.execute(f"INSERT INTO people VALUES (NULL, ?)", (person.personName))
+        self.cursor.execute(f"INSERT INTO people VALUES (NULL, ?)", (person.personName,))
         self.connection.commit()
 
     def create_new_transaction(self, transaction: transaction) -> None:
