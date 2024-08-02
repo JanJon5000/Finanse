@@ -15,7 +15,7 @@ class QCustomFilterWidget(QWidget):
         self.qScrollPart = QScrollArea(self)
 
         # customizing scrollable part - a list
-        self.qScrollPart.setWidgetResizable(True) 
+        self.qScrollPart.setWidgetResizable(True)
         self.qListPart = QListWidget(self)
         self.qListPart.addItems(qListValues)
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
@@ -26,15 +26,15 @@ class QCustomFilterWidget(QWidget):
         self.accesibleLayout = QGridLayout(self)
         self.accesibleLayout.addWidget(self.qLabelPart, 0, 0)
         self.accesibleLayout.addWidget(self.qScrollPart, 1, 0)
-
+        
         self.setLayout(self.accesibleLayout)
 
 class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
+    closed = pyqtSignal()
     def __init__(self, parent=None) -> None:
         super().__init__()
         QDialog.__init__(self, parent)
         SQL_SINGLE_INSTANCE.__init__(self)
-        self.closed = pyqtSignal()
         self.populateGrid()
     
     def populateGrid(self):
@@ -58,7 +58,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.qInteractiveComps[-1].setGridVisible(True)
         self.qInteractiveComps[-1].setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         self.qInteractiveComps[-1].setLocale(QLocale(QLocale.Polish))
-        with open('/Users/jan/VSCODE/Finanse/callendar-stylesheet.css', 'r') as file:
+        with open('callendar-stylesheet.qss', 'r') as file:
             self.qInteractiveComps[-1].setStyleSheet(file.read())
         # setup inner of the layout
         for i in range(4):
@@ -89,6 +89,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
                     data.append(self.qInteractiveComps[i].isChecked())
         # checking if the data was properly written
         if data[0] != '' and data[1] != '' and data[2] != '':
+            data[2] = data[2].replace(',', '.')
             code_lines = [
                 "if float(data[2]) != 0.0: selectedData['money'] = float(data[2])",
                 "selectedData['isIncome'] = data[3]",
@@ -117,11 +118,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
                     exec(objectExec)
                 self.cursor.execute(command)
                 selectedData[sqlIndex] = self.cursor.fetchall()[0][0]
-            if selectedData['isIncome']:
-                minus = 1
-            else:
-                minus = -1  
-            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], minus*selectedData['money'], selectedData['idOfOther']))
+            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], selectedData['money'], selectedData['idOfOther']))
             self.refresh()
 
     def setCompleters(self) -> None:

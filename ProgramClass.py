@@ -88,7 +88,7 @@ class Program(CORE, QWidget):
         self.recordBox.setMaxLength(2)
         self.recordBox.textChanged.connect(self.change_record_num)
         self.g.addWidget(self.recordBox, 1, 0)
-        # Button creating a diagram out of wanted records
+        # Button creating a diagram out of visible transactions
         self.g.addWidget(QLabel("wykres", self), 1, 1)
         # QComboboxes which the user can use in order to filter the results
         # 1
@@ -153,6 +153,7 @@ class Program(CORE, QWidget):
         global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
         self.dialog.setMinimumSize(1, 1)
         self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.height(), 1, 1))
+        self.dialog.closed.connect(self.refresh)
 
         self.animation = QPropertyAnimation(self.dialog, b"size")
         self.animation.setDuration(300)

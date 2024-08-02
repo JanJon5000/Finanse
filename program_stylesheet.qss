@@ -1,0 +1,79 @@
+QWidget {
+    background-color: #121212;
+    color: #E0E0E0;
+    font-family: Arial, sans-serif;
+}
+
+/* Stylizacja przycisków */
+QPushButton {
+    background-color: #1F1F1F;
+    color: #E0E0E0;
+    border: 1px solid #3C3C3C;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+}
+QPushButton:hover {
+    background-color: #323232;
+}
+QPushButton:pressed {
+    background-color: #484848;
+}
+
+/* Stylizacja QLabel */
+QLabel {
+    color: #E0E0E0;
+    background-color: transparent;
+    padding: 5px;
+    margin: 5px;
+}
+
+/* Stylizacja QScrollArea */
+QScrollArea {
+    background-color: #1F1F1F;
+    border: 1px solid #3C3C3C;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+}
+
+QScrollBar:vertical {
+    border: 1px solid #3C3C3C;
+    background: #1F1F1F;
+    width: 15px;
+    margin: 22px 0 22px 0;
+}
+QScrollBar::handle:vertical {
+    background: #3C3C3C;
+    min-height: 20px;
+}
+QScrollBar::add-line:vertical {
+    border: 1px solid #3C3C3C;
+    background: #121212;
+    height: 20px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    border: 1px solid #3C3C3C;
+    background: #121212;
+    height: 20px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border: 1px solid #3C3C3C;
+    width: 3px;
+    height: 3px;
+    background: #E0E0E0;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+* {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 14pt;
+}
