@@ -10,7 +10,3 @@ if __name__ == "__main__":
         app.setStyleSheet(qss)
     widget = Program()
     exit(app.exec_())
-
-# To do
-# wyswietlanie sie negatywnych kwot w widoku głównym, kategorii w kolorach
-# QDialog filtrów

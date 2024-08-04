@@ -1,42 +1,42 @@
 from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal, QDate, QRect
 from PyQt5.QtGui import QPainter, QColor
-from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog, QSlider
+from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog, QSlider, QVBoxLayout
 from fundamentalClasses import SQL_SINGLE_INSTANCE, person, transaction, category
 import traceback
 from datetime import date
 from random import randint
 
-class QCircle(QWidget):
-    def __init__(self, widht: int, height: int, R:int, G:int, B:int, parent: QWidget | None) -> None:
-        super().__init__()
-        QWidget.__init__(self, parent)
-        self.setGeometry(100, 100, widht, height)
-        self.color = QColor(R, G, B)
-    
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setBrush(QColor(self.RGB['R'], self.RGB['G'], self.RGB['B']))
-        painter.setPen(QColor(0, 0, 0))
-
-        rect = QRect(50, 50, 200, 200)
-        painter.drawEllipse(rect)
-    
-    def setColor(self, color):
-        self.color = color
-        self.update()
-
-
 class QColorPicker(QWidget):
-    def __init__(self, parent: QWidget | None) -> None:
-        super().__init__()
-        QWidget.__init__(self, parent)
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
-        # creating sliders and labels - all of the functional widget in the layout
+        # Creating sliders and labels
         self.sliderList = [QSlider(Qt.Horizontal, self) for _ in range(3)]
-        self.labelList = [QLabel(text, self) for text in ("red", 'blue', 'green')]
-        # a circle representing a color which can be created using the RGB values
-        self.CircleWidget = QCircle(200, 200, 0, 0, 0)
+        self.labelList = [QLabel(text, self) for text in ("czerwony", 'niebieski', 'zielony')]
         
+        # Rectangle representing a color which can be created using the RGB values
+        self.colorRect = QLabel(self)
+        self.colorRect.setFixedSize(200, 200)
+        
+        # Setting up the layout
+        self.accesibleLayout = QVBoxLayout()
+        self.accesibleLayout.addWidget(self.colorRect)
+
+        for i in range(len(self.sliderList)):
+            self.sliderList[i].setMaximum(255)
+            self.sliderList[i].setMinimum(0)
+            self.sliderList[i].setValue(0)
+            self.sliderList[i].valueChanged.connect(self.update_color)
+            self.accesibleLayout.addWidget(self.labelList[i])
+            self.accesibleLayout.addWidget(self.sliderList[i])
+        
+        self.setLayout(self.accesibleLayout)
+
+    def update_color(self):
+        red = self.sliderList[0].value()
+        blue = self.sliderList[1].value()
+        green = self.sliderList[2].value()
+        self.colorRect.setStyleSheet(f"background-color: rgb({red}, {green}, {blue});")
 
 class QFilterWidget(QWidget):
     def __init__(self, parent = None, qListValues = [], name = "") -> None:
@@ -106,7 +106,8 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.accessibleLayout.addWidget(self.innerWidget, 0, 0)
         self.accessibleLayout.addWidget(self.qInteractiveComps[-1], 0, 1)
         self.accessibleLayout.addWidget(self.qButtonPart, 1, 0, 1, 2)
-        
+        self.accessibleLayout.addWidget(QColorPicker(self), 0, 2)
+
         self.setLayout(self.accessibleLayout)
 
     def on_click_button(self):

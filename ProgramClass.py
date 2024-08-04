@@ -111,9 +111,17 @@ class Program(CORE, QWidget):
         # filtered data
         counter = 3
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
+        self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
+        # printing all the categories in their colors
+        colors = self.cursor.fetchall()
+        colors = {tpl[0]:[int(i) for i in tpl[1].split(',')] for tpl in colors}
         for record in self.shownContent:
             for i in range(len(record)):
-                self.g.addWidget(QLabel(str(record[i]), self), counter, i)
+                placeholder = QLabel(str(record[i]), self)
+                try:
+                    placeholder.setStyleSheet(f"color: rgb({colors[record[i]][0]}, {colors[record[i]][1]}, {colors[record[i]][2]});")
+                except: pass
+                self.g.addWidget(placeholder, counter, i)
             counter += 1
 
         self.setLayout(self.g)
