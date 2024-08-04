@@ -3,7 +3,7 @@ from datetime import date
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
-from customPYQT5Objects import QCustomFilterWidget, QAddBoxWidget
+from customPYQT5Objects import QFilterWidget, QAddBoxWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -95,13 +95,13 @@ class Program(CORE, QWidget):
         self.cursor.execute("SELECT personName FROM people WHERE 1=1")
         qListValues = self.cursor.fetchall()
         qListValues = [''.join(tpl) for tpl in qListValues]
-        self.nameMultiComboBox = QCustomFilterWidget(self, qListValues, "Imie:")
+        self.nameMultiComboBox = QFilterWidget(self, qListValues, "Imie:")
         self.g.addWidget(self.nameMultiComboBox, 2, 0)
         # 2
         self.cursor.execute("SELECT name FROM categories WHERE 1=1")
         qListValues = self.cursor.fetchall()
         qListValues = [''.join(tpl) for tpl in qListValues]
-        self.categoryMultiComboBox = QCustomFilterWidget(self, qListValues, "Kategoria:")
+        self.categoryMultiComboBox = QFilterWidget(self, qListValues, "Kategoria:")
         self.g.addWidget(self.categoryMultiComboBox, 2, 1)
         # SOON a widget with a scroll bar to choose money range
         self.g.addWidget(QLabel("kasa", self), 2, 2)

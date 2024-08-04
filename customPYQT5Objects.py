@@ -1,12 +1,44 @@
-from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal, QDate
-from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog
+from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal, QDate, QRect
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog, QSlider
 from fundamentalClasses import SQL_SINGLE_INSTANCE, person, transaction, category
 import traceback
 from datetime import date
 from random import randint
 
-class QCustomFilterWidget(QWidget):
+class QCircle(QWidget):
+    def __init__(self, widht: int, height: int, R:int, G:int, B:int, parent: QWidget | None) -> None:
+        super().__init__()
+        QWidget.__init__(self, parent)
+        self.setGeometry(100, 100, widht, height)
+        self.color = QColor(R, G, B)
+    
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setBrush(QColor(self.RGB['R'], self.RGB['G'], self.RGB['B']))
+        painter.setPen(QColor(0, 0, 0))
+
+        rect = QRect(50, 50, 200, 200)
+        painter.drawEllipse(rect)
+    
+    def setColor(self, color):
+        self.color = color
+        self.update()
+
+
+class QColorPicker(QWidget):
+    def __init__(self, parent: QWidget | None) -> None:
+        super().__init__()
+        QWidget.__init__(self, parent)
+
+        # creating sliders and labels - all of the functional widget in the layout
+        self.sliderList = [QSlider(Qt.Horizontal, self) for _ in range(3)]
+        self.labelList = [QLabel(text, self) for text in ("red", 'blue', 'green')]
+        # a circle representing a color which can be created using the RGB values
+        self.CircleWidget = QCircle(200, 200, 0, 0, 0)
+        
+
+class QFilterWidget(QWidget):
     def __init__(self, parent = None, qListValues = [], name = "") -> None:
         super().__init__()
         QWidget.__init__(self, parent)
