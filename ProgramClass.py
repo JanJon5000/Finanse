@@ -4,6 +4,7 @@ from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
+from QFilteringWidgets import QFilterBoxWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -90,8 +91,11 @@ class Program(CORE, QWidget):
         self.g.addWidget(self.recordBox, 1, 0)
         # Button creating a diagram out of visible transactions
         self.g.addWidget(QLabel("wykres", self), 1, 1)
+        
         # button which opens up the filter dialog window
-
+        self.filterButton = QPushButton('filtry', self)
+        self.filterButton.clicked.connect(self.showFilterDialog)
+        self.g.addWidget(self.filterButton, 2, 0)
         
         # filtered data
         counter = 3
@@ -163,4 +167,17 @@ class Program(CORE, QWidget):
         self.animation.start()
         self.dialog.exec_()
 
-        
+    def showFilterDialog(self):
+        self.dialog = QFilterBoxWidget(self)
+        button_geometry = self.adderButton.geometry()
+        global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
+        self.dialog.setMinimumSize(1, 1)
+        self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.height(), 1, 1))
+        self.dialog.closed.connect(self.refresh)
+
+        self.animation = QPropertyAnimation(self.dialog, b"size")
+        self.animation.setDuration(300)
+        self.animation.setStartValue(QSize(1, 1))
+        self.animation.setEndValue(QSize(1000, 300))
+        self.animation.start()
+        self.dialog.exec_()
