@@ -16,7 +16,7 @@ QCalendarWidget QToolButton::hover {
 }
 
 QCalendarWidget QToolButton#qt_calendar_prevmonth {
-    qproperty-icon: url(/Users/jan/VSCODE/Finanse/left-arrow.png);
+    qproperty-icon: url(IMG/left-arrow.png);
     width: 40px; 
     height: 40px;
     padding: 0px; /* Usuń wypełnienie */
@@ -25,7 +25,7 @@ QCalendarWidget QToolButton#qt_calendar_prevmonth {
 }
 
 QCalendarWidget QToolButton#qt_calendar_nextmonth {
-    qproperty-icon: url(/Users/jan/VSCODE/Finanse/right-arrow.png);
+    qproperty-icon: url(IMG/right-arrow.png);
     width: 40px; 
     height: 40px;
     padding: 0px; /* Usuń wypełnienie */

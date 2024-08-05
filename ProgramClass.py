@@ -3,7 +3,7 @@ from datetime import date
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
-from customPYQT5Objects import QFilterWidget, QAddBoxWidget
+from QAddBoxClass import QAddBoxWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -90,23 +90,8 @@ class Program(CORE, QWidget):
         self.g.addWidget(self.recordBox, 1, 0)
         # Button creating a diagram out of visible transactions
         self.g.addWidget(QLabel("wykres", self), 1, 1)
-        # QComboboxes which the user can use in order to filter the results
-        # 1
-        self.cursor.execute("SELECT personName FROM people WHERE 1=1")
-        qListValues = self.cursor.fetchall()
-        qListValues = [''.join(tpl) for tpl in qListValues]
-        self.nameMultiComboBox = QFilterWidget(self, qListValues, "Imie:")
-        self.g.addWidget(self.nameMultiComboBox, 2, 0)
-        # 2
-        self.cursor.execute("SELECT name FROM categories WHERE 1=1")
-        qListValues = self.cursor.fetchall()
-        qListValues = [''.join(tpl) for tpl in qListValues]
-        self.categoryMultiComboBox = QFilterWidget(self, qListValues, "Kategoria:")
-        self.g.addWidget(self.categoryMultiComboBox, 2, 1)
-        # SOON a widget with a scroll bar to choose money range
-        self.g.addWidget(QLabel("kasa", self), 2, 2)
-        # SOON a callendar/scroll bar to choose date range
-        self.g.addWidget(QLabel("data", self), 2, 3)
+        # button which opens up the filter dialog window
+
         
         # filtered data
         counter = 3

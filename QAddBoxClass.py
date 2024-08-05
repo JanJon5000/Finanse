@@ -6,61 +6,6 @@ import traceback
 from datetime import date
 from random import randint
 
-class QColorPicker(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        # Creating sliders and labels
-        self.sliderList = [QSlider(Qt.Horizontal, self) for _ in range(3)]
-        self.labelList = [QLabel(text, self) for text in ("czerwony", 'niebieski', 'zielony')]
-        
-        # Rectangle representing a color which can be created using the RGB values
-        self.colorRect = QLabel(self)
-        self.colorRect.setFixedSize(200, 200)
-        
-        # Setting up the layout
-        self.accesibleLayout = QVBoxLayout()
-        self.accesibleLayout.addWidget(self.colorRect)
-
-        for i in range(len(self.sliderList)):
-            self.sliderList[i].setMaximum(255)
-            self.sliderList[i].setMinimum(0)
-            self.sliderList[i].setValue(0)
-            self.sliderList[i].valueChanged.connect(self.update_color)
-            self.accesibleLayout.addWidget(self.labelList[i])
-            self.accesibleLayout.addWidget(self.sliderList[i])
-        
-        self.setLayout(self.accesibleLayout)
-
-    def update_color(self):
-        red = self.sliderList[0].value()
-        blue = self.sliderList[1].value()
-        green = self.sliderList[2].value()
-        self.colorRect.setStyleSheet(f"background-color: rgb({red}, {green}, {blue});")
-
-class QFilterWidget(QWidget):
-    def __init__(self, parent = None, qListValues = [], name = "") -> None:
-        super().__init__()
-        QWidget.__init__(self, parent)
-
-        self.qLabelPart = QLabel(name, self)
-        self.qScrollPart = QScrollArea(self)
-
-        # customizing scrollable part - a list
-        self.qScrollPart.setWidgetResizable(True)
-        self.qListPart = QListWidget(self)
-        self.qListPart.addItems(qListValues)
-        self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
-        self.qScrollPart.setWidget(self.qListPart)
-        self.qScrollPart.setFixedSize(300, 300)
-
-        # a fixed layout of the widget
-        self.accesibleLayout = QGridLayout(self)
-        self.accesibleLayout.addWidget(self.qLabelPart, 0, 0)
-        self.accesibleLayout.addWidget(self.qScrollPart, 1, 0)
-        
-        self.setLayout(self.accesibleLayout)
-
 class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
     closed = pyqtSignal()
     def __init__(self, parent=None) -> None:
@@ -90,7 +35,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.qInteractiveComps[-1].setGridVisible(True)
         self.qInteractiveComps[-1].setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         self.qInteractiveComps[-1].setLocale(QLocale(QLocale.Polish))
-        with open('callendar-stylesheet.qss', 'r') as file:
+        with open('styleSHEETS/callendar-stylesheet.qss', 'r') as file:
             self.qInteractiveComps[-1].setStyleSheet(file.read())
         # setup inner of the layout
         for i in range(4):
@@ -106,7 +51,6 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.accessibleLayout.addWidget(self.innerWidget, 0, 0)
         self.accessibleLayout.addWidget(self.qInteractiveComps[-1], 0, 1)
         self.accessibleLayout.addWidget(self.qButtonPart, 1, 0, 1, 2)
-        self.accessibleLayout.addWidget(QColorPicker(self), 0, 2)
 
         self.setLayout(self.accessibleLayout)
 
