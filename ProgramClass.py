@@ -12,7 +12,7 @@ class CORE(SQL_SINGLE_INSTANCE):
         self.shownContent = list()
         
     def show_table(self, filters: dict, orderFilters: list,  limit: int) -> None:
-        command = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
+        command = "SELECT people.personName, categories.name, transactions.money, transactions.date, transactions.isIncome FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         self.filters = filters
         self.orderFilters = orderFilters
         if self.filters == dict():
@@ -111,16 +111,24 @@ class Program(CORE, QWidget):
         # filtered data
         counter = 3
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
-        self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
         # printing all the categories in their colors
+        self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
         colors = self.cursor.fetchall()
         colors = {tpl[0]:[int(i) for i in tpl[1].split(',')] for tpl in colors}
+        # setting the colors of 'money' value depending on its 'isIncome' property
         for record in self.shownContent:
             for i in range(len(record)):
-                placeholder = QLabel(str(record[i]), self)
-                try:
+                if i != 4:
+                    placeholder = QLabel(str(record[i]))
+                else: continue
+                if i == 1:
                     placeholder.setStyleSheet(f"color: rgb({colors[record[i]][0]}, {colors[record[i]][1]}, {colors[record[i]][2]});")
-                except: pass
+                if i == 2:
+                    if record[-1]:
+                        placeholder.setStyleSheet("color: rgb(0, 255, 0);")
+                    else:
+                        placeholder = QLabel('-' + str(record[2]), self)
+                        placeholder.setStyleSheet("color: rgb(255, 0, 0)")
                 self.g.addWidget(placeholder, counter, i)
             counter += 1
 

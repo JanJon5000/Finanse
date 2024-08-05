@@ -151,7 +151,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
                     exec(objectExec)
                 self.cursor.execute(command)
                 selectedData[sqlIndex] = self.cursor.fetchall()[0][0]
-            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], selectedData['money'], selectedData['idOfOther']))
+            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], selectedData['isIncome'], selectedData['idOfOther']))
             self.refresh()
 
     def setCompleters(self) -> None:
