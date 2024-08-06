@@ -1,7 +1,7 @@
 import sqlite3 as sql
 from datetime import date
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFilterBoxWidget
@@ -62,7 +62,7 @@ class Program(CORE, QWidget):
         self.settings["rowNumber"] = placeholder[2]
         self.orderFilters = []
         #setting the layout to grid
-        self.g = QGridLayout()
+        self.mainGrid = QGridLayout()
         self.populate_grid()
         
         self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
@@ -78,27 +78,102 @@ class Program(CORE, QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
     
+    # def populate_grid(self) -> None:
+    #     # custom widget by which the user can add a transaction to his history
+    #     self.adderButton = QPushButton('dodaj tranzakcje', self)
+    #     self.adderButton.clicked.connect(self.showAdderDialog)
+    #     self.g.addWidget(self.adderButton, 0, 0)
+
+    #     # QlineEdit with number of records to be shown
+    #     self.recordBox = QLineEdit(self)
+    #     self.recordBox.setMaxLength(2)
+    #     self.recordBox.textChanged.connect(self.change_record_num)
+    #     self.g.addWidget(self.recordBox, 1, 0)
+    #     # Button creating a diagram out of visible transactions
+    #     self.g.addWidget(QLabel("wykres", self), 1, 1)
+        
+    #     # button which opens up the filter dialog window
+    #     self.filterButton = QPushButton('filtry', self)
+    #     self.filterButton.clicked.connect(self.showFilterDialog)
+    #     self.g.addWidget(self.filterButton, 2, 0)
+        
+    #     # filtered data
+    #     counter = 3
+    #     self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
+    #     # printing all the categories in their colors
+    #     self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
+    #     colors = self.cursor.fetchall()
+    #     colors = {tpl[0]:[int(i) for i in tpl[1].split(',')] for tpl in colors}
+    #     # setting the colors of 'money' value depending on its 'isIncome' property
+    #     for record in self.shownContent:
+    #         for i in range(len(record)):
+    #             if i != 4:
+    #                 placeholder = QLabel(str(record[i]))
+    #             else: continue
+    #             if i == 1:
+    #                 placeholder.setStyleSheet(f"color: rgb({colors[record[i]][0]}, {colors[record[i]][1]}, {colors[record[i]][2]});")
+    #             if i == 2:
+    #                 if record[-1]:
+    #                     placeholder.setStyleSheet("color: rgb(0, 255, 0);")
+    #                 else:
+    #                     placeholder = QLabel('-' + str(record[2]), self)
+    #                     placeholder.setStyleSheet("color: rgb(255, 0, 0)")
+    #             self.g.addWidget(placeholder, counter, i)
+    #         counter += 1
+
+    #     self.setLayout(self.g)
+
     def populate_grid(self) -> None:
-        # custom widget by which the user can add a transaction to his history
+        ############        FILTERS AND SETTINGS - COLUMN 0
+        # 'watermark' of my app
+        self.logo = QLabel('logo')
+        self.mainGrid.addWidget(self.logo, 0, 0)
+
+        # PLACEHOLDER widget responsible for how the data is ordered
+        self.orderWidget = QLabel('PLACEHOLDER')
+        self.mainGrid.addWidget(self.orderWidget, 1, 0)
+
+        # PLACEHOLDER widget responsible for determining which 'date range' is supposed to be shown
+        self.dataFilter = QLabel('PLACEHOLDER')
+        self.mainGrid.addWidget(self.dataFilter, 2, 0)
+
+        # PLACEHOLDER widget responsible for determining which 'ammount range' is supposed to be displayed
+        self.sumFilter = QLabel('PLACEHOLDER')
+        self.mainGrid.addWidget(self.dataFilter, 3, 0)
+
+        # PLACEHOLDER widget responsible for determining which categories are supposed to be displayed
+        self.categoryFilter = QLabel('PLACEHOLDER')
+        self.mainGrid.addWidget(self.dataFilter, 4, 0)
+
+        # QlineEdit setting the number of records to be displayed
+        self.recordFilter = QLineEdit(self)
+        self.recordFilter.setMaxLength(2)
+        self.recordFilter.textChanged.connect(self.change_record_num)
+        self.mainGrid.addWidget(self.recordFilter, 5, 0)
+
+        # PLACEHOLDER buttons for deleting, applying filters and removing filters
+        self.settingButtons = [QPushButton(text) for text in ('usuń', 'zastosuj', 'przywróc')]
+        buttonLayout = QVBoxLayout()
+        for b in self.settingButtons:
+            buttonLayout.addWidget(b)
+        buttonWidget = QWidget()
+        buttonWidget.setLayout(buttonLayout)
+        self.mainGrid.addWidget(buttonWidget, 6, 0)
+
+        ############        OTHER - ROW 0
+        # a button which opens up a dialog window with ability to add new data to db
         self.adderButton = QPushButton('dodaj tranzakcje', self)
         self.adderButton.clicked.connect(self.showAdderDialog)
-        self.g.addWidget(self.adderButton, 0, 0)
+        self.mainGrid.addWidget(self.adderButton, 0, 1)
 
-        # QlineEdit with number of records to be shown
-        self.recordBox = QLineEdit(self)
-        self.recordBox.setMaxLength(2)
-        self.recordBox.textChanged.connect(self.change_record_num)
-        self.g.addWidget(self.recordBox, 1, 0)
-        # Button creating a diagram out of visible transactions
-        self.g.addWidget(QLabel("wykres", self), 1, 1)
-        
-        # button which opens up the filter dialog window
-        self.filterButton = QPushButton('filtry', self)
-        self.filterButton.clicked.connect(self.showFilterDialog)
-        self.g.addWidget(self.filterButton, 2, 0)
-        
-        # filtered data
-        counter = 3
+        # PLACEHOLDER  a button tht generates and displays diagram out of displayed data
+        self.diagramButton = QLabel('PLACEHOLDER')
+        self.mainGrid.addWidget(self.diagramButton, 0, 2)
+
+        # seperate widget with seperate layout of the data, after ordering after filters
+        dataWidget = QWidget()
+        dataLayout = QGridLayout()
+        counter = 0
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         # printing all the categories in their colors
         self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
@@ -118,10 +193,12 @@ class Program(CORE, QWidget):
                     else:
                         placeholder = QLabel('-' + str(record[2]), self)
                         placeholder.setStyleSheet("color: rgb(255, 0, 0)")
-                self.g.addWidget(placeholder, counter, i)
+                dataLayout.addWidget(placeholder, counter, i)
             counter += 1
+        dataWidget.setLayout(dataLayout)
+        self.mainGrid.addWidget(dataWidget, 1, 1, 4, 2)
 
-        self.setLayout(self.g)
+        self.setLayout(self.mainGrid)
 
     def refresh(self) -> None:
         self.clear_layout(self.g)
@@ -154,21 +231,6 @@ class Program(CORE, QWidget):
     
     def showAdderDialog(self):
         self.dialog = QAddBoxWidget(self)
-        button_geometry = self.adderButton.geometry()
-        global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
-        self.dialog.setMinimumSize(1, 1)
-        self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.height(), 1, 1))
-        self.dialog.closed.connect(self.refresh)
-
-        self.animation = QPropertyAnimation(self.dialog, b"size")
-        self.animation.setDuration(300)
-        self.animation.setStartValue(QSize(1, 1))
-        self.animation.setEndValue(QSize(1000, 300))
-        self.animation.start()
-        self.dialog.exec_()
-
-    def showFilterDialog(self):
-        self.dialog = QFilterBoxWidget(self)
         button_geometry = self.adderButton.geometry()
         global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
         self.dialog.setMinimumSize(1, 1)
