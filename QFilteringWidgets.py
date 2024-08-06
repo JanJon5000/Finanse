@@ -1,11 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QDialog, QVBoxLayout, QDateEdit, QSlider, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit
 from PyQt5.QtCore import QDate, Qt, pyqtSignal
+from PyQt5.QtGui import QPen, QPainter, QColor
 
 class QListFilter(QWidget):
-    def __init__(self, parent = None, qListValues = [], name = "") -> None:
+    def __init__(self, parent = None, qListValues = []) -> None:
         super().__init__()
-
-        self.qLabelPart = QLabel(name, self)
         self.qScrollPart = QScrollArea(self)
 
         # customizing scrollable part - a list
@@ -23,83 +22,66 @@ class QListFilter(QWidget):
         
         self.setLayout(self.accesibleLayout)
 
-class QDateRangePicker(QWidget):
-    def __init__(self):
+class QColorLineWidget(QWidget):
+    def __init__(self, min: int, max: int):
         super().__init__()
+        self.color = QColor(64, 255, 100)
+        self.start_ratio = 0  # Initial start position ratio (0.0 to 1.0)
+        self.end_ratio = 1 # Initial end position ratio (0.0 to 1.0)
 
-        self.start_date_edit = QDateEdit(self)
-        self.start_date_edit.setCalendarPopup(True)
-        self.start_date_edit.setDate(QDate.currentDate().addDays(-30))
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        pen = QPen()
+        pen.setWidth(5)
 
-        self.end_date_edit = QDateEdit(self)
-        self.end_date_edit.setCalendarPopup(True)
-        self.end_date_edit.setDate(QDate.currentDate())
+        width = self.width()
 
-        with open("styleSHEETS/callendar-stylesheet.qss", "r") as file:
-            for i in [self.end_date_edit, self.start_date_edit]:
-                qss = file.read()
-                i.setStyleSheet(qss)
+        start_pos = int(self.start_ratio * width)
+        end_pos = int(self.end_ratio * width)
 
-        self.start_date_edit.dateChanged.connect(self.update_range)
-        self.end_date_edit.dateChanged.connect(self.update_range)
+        # Draw colored segment
+        pen.setColor(self.color)
+        painter.setPen(pen)
+        painter.drawLine(start_pos, self.height() // 2, end_pos, self.height() // 2)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.start_date_edit)
-        layout.addWidget(self.end_date_edit)
+        # Draw the rest of the line in black
+        pen.setColor(Qt.black)
+        painter.setPen(pen)
+        painter.drawLine(0, self.height() // 2, start_pos, self.height() // 2)
+        painter.drawLine(end_pos, self.height() // 2, width, self.height() // 2)
 
-        self.setLayout(layout)
+    def set_line_ratios(self, start_ratio, end_ratio):
+        self.start_ratio = start_ratio
+        self.end_ratio = end_ratio
+        self.update()
 
-    def update_range(self):
-        if self.start_date_edit.date() > self.end_date_edit.date():
-            self.start_date_edit.setDate(self.end_date_edit.date())
-
-class QMoneyRangeSlider(QWidget):
-    def __init__(self):
+class QFromToFilter(QWidget):
+    def __init__(self, max, min, parent=None) -> None:
         super().__init__()
-        self.setMinimumWidth(300)
-        
-        self.lower_slider = QSlider(Qt.Horizontal)
-        self.lower_slider.setRange(0, 100)
-        self.lower_slider.setValue(20)
-        
-        self.upper_slider = QSlider(Qt.Horizontal)
-        self.upper_slider.setRange(0, 100)
-        self.upper_slider.setValue(80)
-        
-        self.lower_slider.valueChanged.connect(self.update_range)
-        self.upper_slider.valueChanged.connect(self.update_range)
+        self.accesibleLayout = QGridLayout()
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.lower_slider)
-        layout.addWidget(self.upper_slider)
-        
-        self.range_label = QLabel(self.get_range_text())
-        layout.addWidget(self.range_label)
+        self.smallerData = QLineEdit()
+        self.smallerData.setPlaceholderText('...Od')
+        self.smallerData.textChanged.connect(self.update_color_line)
 
-        self.setLayout(layout)
-        
-    def update_range(self):
-        if self.lower_slider.value() > self.upper_slider.value():
-            self.lower_slider.setValue(self.upper_slider.value())
+        self.biggerData = QLineEdit()
+        self.biggerData.setPlaceholderText('Do...')
+        self.biggerData.textChanged.connect(self.update_color_line)
 
-    def get_range_text(self):
-        return f"Range: {self.lower_slider.value()} - {self.upper_slider.value()}"
+        self.DataPresentationLevel = QColorLineWidget()
 
-class QFilterBoxWidget(QDialog):
-    closed = pyqtSignal()
-    def __init__(self, parent=None) -> None:
-        super().__init__()
-        QDialog.__init__(parent)
-        self.accesibleLayout = QHBoxLayout()
-        self.widgetList = [QListFilter(qListValues=[], name="Imie"), 
-                           QListFilter(qListValues=[], name="Kategoria"),
-                           QDateRangePicker(),
-                           QMoneyRangeSlider()
-                          ]
-        for widg in self.widgetList:
-            self.accesibleLayout.addWidget(widg)
+        self.accesibleLayout = QGridLayout()
+        self.accesibleLayout.addWidget(self.DataPresentationLevel, 0, 0, 1, 2)
+        self.accesibleLayout.addWidget(self.smallerData, 1, 0)
+        self.accesibleLayout.addWidget(self.biggerData, 1, 1)
+
         self.setLayout(self.accesibleLayout)
 
-    def closeEvent(self, event) -> None:
-        self.closed.emit()
-        super().closeEvent(event)
+    def update_color_line(self):
+        try:
+            start_ratio = float(self.startInput.text())
+            end_ratio = float(self.endInput.text())
+            if 0 <= start_ratio <= end_ratio <= 1:
+                self.colorLineWidget.set_line_ratios(start_ratio, end_ratio)
+        except ValueError:
+            pass  # Ignore invalid input

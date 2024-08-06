@@ -77,51 +77,6 @@ class Program(CORE, QWidget):
                     child.widget().deleteLater()
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
-    
-    # def populate_grid(self) -> None:
-    #     # custom widget by which the user can add a transaction to his history
-    #     self.adderButton = QPushButton('dodaj tranzakcje', self)
-    #     self.adderButton.clicked.connect(self.showAdderDialog)
-    #     self.g.addWidget(self.adderButton, 0, 0)
-
-    #     # QlineEdit with number of records to be shown
-    #     self.recordBox = QLineEdit(self)
-    #     self.recordBox.setMaxLength(2)
-    #     self.recordBox.textChanged.connect(self.change_record_num)
-    #     self.g.addWidget(self.recordBox, 1, 0)
-    #     # Button creating a diagram out of visible transactions
-    #     self.g.addWidget(QLabel("wykres", self), 1, 1)
-        
-    #     # button which opens up the filter dialog window
-    #     self.filterButton = QPushButton('filtry', self)
-    #     self.filterButton.clicked.connect(self.showFilterDialog)
-    #     self.g.addWidget(self.filterButton, 2, 0)
-        
-    #     # filtered data
-    #     counter = 3
-    #     self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
-    #     # printing all the categories in their colors
-    #     self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
-    #     colors = self.cursor.fetchall()
-    #     colors = {tpl[0]:[int(i) for i in tpl[1].split(',')] for tpl in colors}
-    #     # setting the colors of 'money' value depending on its 'isIncome' property
-    #     for record in self.shownContent:
-    #         for i in range(len(record)):
-    #             if i != 4:
-    #                 placeholder = QLabel(str(record[i]))
-    #             else: continue
-    #             if i == 1:
-    #                 placeholder.setStyleSheet(f"color: rgb({colors[record[i]][0]}, {colors[record[i]][1]}, {colors[record[i]][2]});")
-    #             if i == 2:
-    #                 if record[-1]:
-    #                     placeholder.setStyleSheet("color: rgb(0, 255, 0);")
-    #                 else:
-    #                     placeholder = QLabel('-' + str(record[2]), self)
-    #                     placeholder.setStyleSheet("color: rgb(255, 0, 0)")
-    #             self.g.addWidget(placeholder, counter, i)
-    #         counter += 1
-
-    #     self.setLayout(self.g)
 
     def populate_grid(self) -> None:
         ############        FILTERS AND SETTINGS - COLUMN 0
@@ -201,7 +156,7 @@ class Program(CORE, QWidget):
         self.setLayout(self.mainGrid)
 
     def refresh(self) -> None:
-        self.clear_layout(self.g)
+        self.clear_layout(self.mainGrid)
         self.populate_grid()
         self.update()
 
