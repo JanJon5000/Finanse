@@ -92,8 +92,8 @@ class Program(CORE, QWidget):
         self.cursor.execute("SELECT date from transactions WHERE 1=1")
         dates = [tpl[0] for tpl in self.cursor.fetchall()]
         dates = [date(int(i[0:4]), int(i[5:7]), int(i[8:])) for i in dates]
-        print(dates)
-        self.dataFilter = QFTLFilter(60, 10)
+        
+        self.dataFilter = QFTLFilter(date(2000, 12, 1), date(1999, 12, 1))
         self.mainGrid.addWidget(self.dataFilter, 2, 0)
 
         # PLACEHOLDER widget responsible for determining which 'ammount range' is supposed to be displayed

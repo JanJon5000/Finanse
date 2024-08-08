@@ -61,6 +61,7 @@ class QFromToFilter(QWidget):
         self.accesibleLayout = QGridLayout()
 
         if isinstance(max, int) and isinstance(min, int):
+            self.flag = int(0)
             if abs(min) != min or abs(max) != max:
                 self.ratioDivider = abs(min) + abs(max)
             else:
@@ -77,9 +78,10 @@ class QFromToFilter(QWidget):
             self.biggerData.textChanged.connect(self.update_color_line)
 
         if isinstance(min, date) and isinstance(max, date):
+            self.flag = date(2000, 2, 2)
             self.minValue = min.toordinal()
             self.maxValue = max.toordinal()
-            self.ratioDivider = float(max - min)
+            self.ratioDivider = float(self.maxValue - self.minValue)
 
             self.smallerData = QDateEdit()
             self.smallerData.setDate(min)
@@ -100,8 +102,18 @@ class QFromToFilter(QWidget):
 
     def update_color_line(self):
         try:
-            start_ratio = float(self.smallerData.text())/self.ratioDivider
-            end_ratio = float(self.biggerData.text())/self.ratioDivider
+            if self.flag == int(0):
+                start_ratio = float(self.smallerData.text())/self.ratioDivider
+                end_ratio = (float(self.biggerData.text())-self.minValue)/self.ratioDivider
+            elif self.flag == date(2000, 2, 2):
+                try:
+                    print(f'tutaj! {self.i+1}')
+                    self.i += 1
+                except:
+                    self.i = 0
+                start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue-1)/self.ratioDivider
+                end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
+                print(start_ratio, self.ratioDivider)
             if 0 <= start_ratio <= end_ratio <= 1:
                 self.DataPresentationLevel.set_line_ratios(start_ratio, end_ratio)
         except ValueError:
