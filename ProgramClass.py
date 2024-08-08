@@ -4,7 +4,7 @@ from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
-from QFilteringWidgets import QFilterBoxWidget
+from QFilteringWidgets import QFTLFilter
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -88,8 +88,12 @@ class Program(CORE, QWidget):
         self.orderWidget = QLabel('PLACEHOLDER')
         self.mainGrid.addWidget(self.orderWidget, 1, 0)
 
-        # PLACEHOLDER widget responsible for determining which 'date range' is supposed to be shown
-        self.dataFilter = QLabel('PLACEHOLDER')
+        # widget responsible for determining which 'date range' is supposed to be shown
+        self.cursor.execute("SELECT date from transactions WHERE 1=1")
+        dates = [tpl[0] for tpl in self.cursor.fetchall()]
+        dates = [date(int(i[0:4]), int(i[5:7]), int(i[8:])) for i in dates]
+        print(dates)
+        self.dataFilter = QFTLFilter(60, 10)
         self.mainGrid.addWidget(self.dataFilter, 2, 0)
 
         # PLACEHOLDER widget responsible for determining which 'ammount range' is supposed to be displayed
