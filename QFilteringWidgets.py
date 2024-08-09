@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel
 from PyQt5.QtCore import QDate, Qt, pyqtSignal
 from PyQt5.QtGui import QPen, QPainter, QColor
 from datetime import date
@@ -13,8 +13,11 @@ class QListFilter(QWidget):
         self.qListPart = QListWidget(self)
         self.qListPart.addItems([str(i) for i in qListValues])
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
+        for i in range(self.qListPart.count()):
+            item = self.qListPart.item(i)
+            item.setSelected(True)
+
         self.qScrollPart.setWidget(self.qListPart)
-        self.qScrollPart.setFixedSize(300, 100)
 
         # a fixed layout of the widget
         self.accesibleLayout = QGridLayout(self)
@@ -77,8 +80,11 @@ class QFromToFilter(QWidget):
             self.biggerData.setPlaceholderText('Do...')
             self.biggerData.textChanged.connect(self.update_color_line)
 
+            self.labels = [QLabel(str(self.minValue)), QLabel(str(self.maxValue))]
+
         if isinstance(min, date) and isinstance(max, date):
             self.flag = date(2000, 2, 2)
+            self.labels = [QLabel(str(min)), QLabel(str(max))]
             self.minValue = min.toordinal()
             self.maxValue = max.toordinal()
             self.ratioDivider = float(self.maxValue - self.minValue)
@@ -86,17 +92,21 @@ class QFromToFilter(QWidget):
             self.smallerData = QDateEdit()
             self.smallerData.setDate(min)
             self.smallerData.dateChanged.connect(self.update_color_line)
-
+            self.smallerData.setDisplayFormat('yyyy-MM-dd')
+            
             self.biggerData = QDateEdit()
             self.biggerData.setDate(max)
             self.biggerData.dateChanged.connect(self.update_color_line)
+            self.biggerData.setDisplayFormat('yyyy-MM-dd')
 
         self.DataPresentationLevel = QColorLineWidget()
 
         self.accesibleLayout = QGridLayout()
-        self.accesibleLayout.addWidget(self.DataPresentationLevel, 0, 0, 1, 2)
-        self.accesibleLayout.addWidget(self.smallerData, 1, 0)
-        self.accesibleLayout.addWidget(self.biggerData, 1, 1)
+        self.accesibleLayout.addWidget(self.labels[0], 0, 0)
+        self.accesibleLayout.addWidget(self.DataPresentationLevel, 0, 1, 1, 2)
+        self.accesibleLayout.addWidget(self.labels[1], 0, 3)
+        self.accesibleLayout.addWidget(self.smallerData, 1, 0, 1, 2)
+        self.accesibleLayout.addWidget(self.biggerData, 1, 2, 1, 2)
 
         self.setLayout(self.accesibleLayout)
 
@@ -126,13 +136,18 @@ class QFTLFilter(QWidget):
         self.forLaterVals = [max, min, listOfValues]
         self.flag = 0
 
+        with open('styleSHEETS/qfilter_stylesheet.qss', 'r') as file:
+            style = file.read()
+            self.setStyleSheet(style)
+
         self.populate_grid()
+        
         self.setLayout(self.accesibleLayout)
         
     def populate_grid(self) -> None:
         self.qComboComponent = QComboBox()
         self.qComboComponent.addItems(['Zakres', 'Konkretne wartości'])
-        self.qComboComponent.setCurrentIndex(self.flag)
+        self.qComboComponent.setCurrentIndex(self.flag) 
         self.qComboComponent.currentIndexChanged.connect(self.refresh)
         
         self.currentFilter = [QFromToFilter(self.forLaterVals[0], self.forLaterVals[1]), QListFilter(qListValues=self.forLaterVals[2])]
