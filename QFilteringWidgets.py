@@ -14,7 +14,7 @@ class QListFilter(QWidget):
         self.qListPart.addItems([str(i) for i in qListValues])
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
         self.qScrollPart.setWidget(self.qListPart)
-        self.qScrollPart.setFixedSize(300, 300)
+        self.qScrollPart.setFixedSize(300, 100)
 
         # a fixed layout of the widget
         self.accesibleLayout = QGridLayout(self)
