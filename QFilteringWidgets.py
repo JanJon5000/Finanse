@@ -11,7 +11,7 @@ class QListFilter(QWidget):
         # customizing scrollable part - a list
         self.qScrollPart.setWidgetResizable(True)
         self.qListPart = QListWidget(self)
-        self.qListPart.addItems(qListValues)
+        self.qListPart.addItems([str(i) for i in qListValues])
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
         self.qScrollPart.setWidget(self.qListPart)
         self.qScrollPart.setFixedSize(300, 300)
@@ -111,7 +111,7 @@ class QFromToFilter(QWidget):
                     self.i += 1
                 except:
                     self.i = 0
-                start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue-1)/self.ratioDivider
+                start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 print(start_ratio, self.ratioDivider)
             if 0 <= start_ratio <= end_ratio <= 1:
@@ -120,22 +120,36 @@ class QFromToFilter(QWidget):
             pass  # Ignore invalid input
 
 class QFTLFilter(QWidget):
-    def __init__(self, max, min) -> None:
+    def __init__(self, max, min, listOfValues) -> None:
         super().__init__()
+        self.accesibleLayout = QVBoxLayout()
+        self.forLaterVals = [max, min, listOfValues]
+        self.flag = 0
+
+        self.populate_grid()
+        self.setLayout(self.accesibleLayout)
+        
+    def populate_grid(self) -> None:
         self.qComboComponent = QComboBox()
         self.qComboComponent.addItems(['Zakres', 'Konkretne wartości'])
-        self.qComboComponent.currentIndexChanged.connect(self.on_val_changed)
-
-        self.currentFilter = [QFromToFilter(max, min), QListFilter(qListValues=[])]
-
-        self.accesibleLayout = QVBoxLayout()
-        self.populate_grid(self.accesibleLayout)
-        self.setLayout(self.accesibleLayout)
-
-    def on_val_changed(self) -> None:
-        print(self.qComboComponent.currentIndex())
-
-    def populate_grid(self, layout: QVBoxLayout) -> None:
-        layout.addWidget(self.qComboComponent)
-        layout.addWidget(self.currentFilter[self.qComboComponent.currentIndex()])
+        self.qComboComponent.setCurrentIndex(self.flag)
+        self.qComboComponent.currentIndexChanged.connect(self.refresh)
         
+        self.currentFilter = [QFromToFilter(self.forLaterVals[0], self.forLaterVals[1]), QListFilter(qListValues=self.forLaterVals[2])]
+        self.accesibleLayout.addWidget(self.qComboComponent)
+        self.accesibleLayout.addWidget(self.currentFilter[self.flag])
+    
+    def refresh(self) -> None:
+        self.flag = not self.flag
+        self.clear_layout(self.accesibleLayout)
+        self.populate_grid()
+        self.update()
+    
+    def clear_layout(self, layout):
+        if layout is not None:
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget() is not None:
+                    child.widget().deleteLater()
+                elif child.layout() is not None:
+                    self.clear_layout(child.layout())

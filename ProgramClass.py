@@ -92,17 +92,20 @@ class Program(CORE, QWidget):
         self.cursor.execute("SELECT date from transactions WHERE 1=1")
         dates = [tpl[0] for tpl in self.cursor.fetchall()]
         dates = [date(int(i[0:4]), int(i[5:7]), int(i[8:])) for i in dates]
-        
-        self.dataFilter = QFTLFilter(date(2000, 12, 1), date(1999, 12, 1))
+        dates.sort()
+        self.dataFilter = QFTLFilter(max(dates), min(dates), dates)
         self.mainGrid.addWidget(self.dataFilter, 2, 0)
 
         # PLACEHOLDER widget responsible for determining which 'ammount range' is supposed to be displayed
-        self.sumFilter = QLabel('PLACEHOLDER')
-        self.mainGrid.addWidget(self.dataFilter, 3, 0)
+        self.cursor.execute("SELECT money FROM transactions WHERE 1=1")
+        sums = [int(i[0]) for i in self.cursor.fetchall()]
+        sums.sort()
+        self.sumFilter = QFTLFilter(max(sums), min(sums), sums)
+        self.mainGrid.addWidget(self.sumFilter, 3, 0)
 
         # PLACEHOLDER widget responsible for determining which categories are supposed to be displayed
         self.categoryFilter = QLabel('PLACEHOLDER')
-        self.mainGrid.addWidget(self.dataFilter, 4, 0)
+        self.mainGrid.addWidget(self.categoryFilter, 4, 0)
 
         # QlineEdit setting the number of records to be displayed
         self.recordFilter = QLineEdit(self)
@@ -165,7 +168,7 @@ class Program(CORE, QWidget):
         self.update()
 
     def change_record_num(self, text) -> None:
-        text = self.recordBox.text()
+        text = self.recordFilter.text()
         try:
             text = int(text)
             self.settings['rowNumber'] = text
