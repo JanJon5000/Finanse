@@ -1,6 +1,6 @@
 import sqlite3 as sql
 from datetime import date
-from PyQt5.QtCore import QRect, QPropertyAnimation, QSize
+from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
@@ -196,9 +196,9 @@ class Program(CORE, QWidget):
     def showAdderDialog(self):
         self.dialog = QAddBoxWidget(self)
         button_geometry = self.adderButton.geometry()
-        global_button_pos = self.adderButton.mapToGlobal(button_geometry.topLeft())
+        global_button_pos = self.adderButton.mapToGlobal(QPoint(0, self.adderButton.height()))
         self.dialog.setMinimumSize(1, 1)
-        self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.height(), 1, 1))
+        self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.y(), 1, 1))
         self.dialog.closed.connect(self.refresh)
 
         self.animation = QPropertyAnimation(self.dialog, b"size")
