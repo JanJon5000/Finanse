@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QCheckBox, QHBoxLayout
 from PyQt5.QtCore import QDate, Qt, pyqtSignal
 from PyQt5.QtGui import QPen, QPainter, QColor
 from datetime import date
@@ -169,4 +169,31 @@ class QFTLFilter(QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
-class QOrderWidget(QWidget)
+class QOrderWidget(QWidget):
+    def __init__(self, parameters) -> None:
+        super().__init__()
+        self.lay = QVBoxLayout()
+        self.flag = 0
+        self.paramList = parameters
+
+        self.activatedLayout = ''
+        self.disactivatedLayout = ''
+
+        self.populateGrid()
+
+    def populateGrid(self) -> None:
+        self.infoLabel = QLabel('niestandardowe sortowanie:')
+        
+        self.checkBox = QCheckBox()
+        self.checkBox.stateChanged.connect(self.onChecked)
+        
+        self.dragDropList = QListWidget()
+        self.dragDropList.addItems(self.paramList)
+
+        self.innerLayout = QHBoxLayout()
+    
+    def onChecked(self):
+        pass
+
+    def onOrderChanged(self):
+        pass
