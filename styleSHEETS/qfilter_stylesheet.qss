@@ -20,3 +20,15 @@ QLineEdit {
     border-radius: 4px;
     padding: 2px;
 }
+
+QDateEdit::down-arrow {
+    image: url(IMG/arrDOWN.png);
+    width: 24px;
+    height: 50px;
+}
+
+QDateEdit::up-arrow {
+    image: url(IMG/arrUP.png);
+    width: 24px;
+    height: 24px;
+}

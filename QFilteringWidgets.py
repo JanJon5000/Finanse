@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QCheckBox, QHBoxLayout
-from PyQt5.QtCore import QDate, Qt, pyqtSignal
+from PyQt5.QtCore import QDate, Qt, pyqtSignal  
 from PyQt5.QtGui import QPen, QPainter, QColor
 from datetime import date
 
@@ -188,12 +188,30 @@ class QOrderWidget(QWidget):
         self.checkBox.stateChanged.connect(self.onChecked)
         
         self.dragDropList = QListWidget()
+        self.dragDropList.setDragDropMode(QListWidget.InternalMove)
         self.dragDropList.addItems(self.paramList)
 
         self.innerLayout = QHBoxLayout()
-    
+        self.innerLayout.addWidget(self.infoLabel)
+        self.innerLayout.addWidget(self.checkBox)
+        self.innerWidg = QWidget()
+        self.innerWidg.setLayout(self.innerLayout)
+
+        self.lay.addWidget(self.innerWidg)
+        self.lay.addWidget(self.dragDropList)
+
+        with open('styleSHEETS/qorder_stylesheet.qss', 'r') as file:
+            style = file.read()
+            self.setStyleSheet(style)
+
+        self.setLayout(self.lay)
+
     def onChecked(self):
-        pass
+        if self.checkBox.isChecked():
+            self.dragDropList.setEnabled(True)
+        else:
+            self.dragDropList.setEnabled(False)
+        self.update()
 
     def onOrderChanged(self):
         pass

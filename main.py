@@ -1,5 +1,4 @@
-from ProgramClass import transaction, person, category, CORE, Program
-from datetime import date, datetime
+from ProgramClass import Program
 from PyQt5.QtWidgets import QApplication
 from sys import argv, exit
 
