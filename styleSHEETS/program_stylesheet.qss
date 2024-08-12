@@ -1,7 +1,39 @@
 QWidget {
     background-color: #121212;
     color: #E0E0E0;
-    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif;QWidget {
+    border: 2px solid #A9A9A9;  
+    border-radius: 4px;         
+}
+
+QLabel {
+    border: 2px solid #A9A9A9;
+    border-radius: 4px;
+}
+
+QPushButton {
+    border: 2px solid #A9A9A9;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+}
+
+QLineEdit {
+    border: 2px solid #A9A9A9;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+QDateEdit::down-arrow {
+    image: url(IMG/arrDOWN.png);
+    width: 24px;
+    height: 50px;
+}
+
+QDateEdit::up-arrow {
+    image: url(IMG/arrUP.png);
+    width: 24px;
+    height: 24px;
+}
 }
 
 /* Stylizacja przycisków */

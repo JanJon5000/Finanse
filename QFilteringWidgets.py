@@ -136,10 +136,6 @@ class QFTLFilter(QWidget):
         self.forLaterVals = [max, min, listOfValues]
         self.flag = 0
 
-        with open('styleSHEETS/qfilter_stylesheet.qss', 'r') as file:
-            style = file.read()
-            self.setStyleSheet(style)
-
         self.populate_grid()
         
         self.setLayout(self.accesibleLayout)
@@ -153,7 +149,10 @@ class QFTLFilter(QWidget):
         self.currentFilter = [QFromToFilter(self.forLaterVals[0], self.forLaterVals[1]), QListFilter(qListValues=self.forLaterVals[2])]
         self.accesibleLayout.addWidget(self.qComboComponent)
         self.accesibleLayout.addWidget(self.currentFilter[self.flag])
-    
+        with open('styleSHEETS/qfilter_stylesheet.qss', 'r') as file:
+            style = file.read()
+            self.setStyleSheet(style)
+
     def refresh(self) -> None:
         self.flag = not self.flag
         self.clear_layout(self.accesibleLayout)
@@ -179,6 +178,9 @@ class QOrderWidget(QWidget):
         self.activatedLayout = ''
         self.disactivatedLayout = ''
 
+        with open('styleSHEETS/qorder_stylesheet.qss', 'r') as file:
+            style = file.read()
+            self.setStyleSheet(style)
         self.populateGrid()
 
     def populateGrid(self) -> None:
@@ -199,10 +201,6 @@ class QOrderWidget(QWidget):
 
         self.lay.addWidget(self.innerWidg)
         self.lay.addWidget(self.dragDropList)
-
-        with open('styleSHEETS/qorder_stylesheet.qss', 'r') as file:
-            style = file.read()
-            self.setStyleSheet(style)
 
         self.setLayout(self.lay)
 
