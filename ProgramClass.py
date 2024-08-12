@@ -4,7 +4,7 @@ from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
-from QFilteringWidgets import QFTLFilter, QOrderWidget
+from QFilteringWidgets import QFTLFilter, QOrderWidget, QListFilter
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -81,7 +81,7 @@ class Program(CORE, QWidget):
     def populate_grid(self) -> None:
         ############        FILTERS AND SETTINGS - COLUMN 0
         # 'watermark' of my app
-        self.logo = QLabel('logo')
+        self.logo = QLabel('LOGO')
         self.mainGrid.addWidget(self.logo, 0, 0)
 
         # widget responsible for how the data is ordered
@@ -106,7 +106,9 @@ class Program(CORE, QWidget):
         self.mainGrid.addWidget(self.sumFilter, 3, 0)
 
         # PLACEHOLDER widget responsible for determining which categories are supposed to be displayed
-        self.categoryFilter = QLabel('PLACEHOLDER')
+        self.cursor.execute('SELECT name FROM categories WHERE 1=1')
+        cats = [i[0] for i in list(set(self.cursor.fetchall()))]
+        self.categoryFilter = QListFilter(cats)
         self.mainGrid.addWidget(self.categoryFilter, 4, 0)
 
         # QlineEdit setting the number of records to be displayed

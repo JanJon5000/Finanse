@@ -210,6 +210,3 @@ class QOrderWidget(QWidget):
         else:
             self.dragDropList.setEnabled(False)
         self.update()
-
-    def onOrderChanged(self):
-        pass
