@@ -98,10 +98,9 @@ class Program(CORE, QWidget):
         self.mainGrid.addWidget(self.dataFilter, 2, 0)
 
         # PLACEHOLDER widget responsible for determining which 'ammount range' is supposed to be displayed
-        self.cursor.execute("SELECT money FROM transactions WHERE 1=1")
-        sums = [int(i[0]) for i in self.cursor.fetchall()]
+        self.cursor.execute("SELECT money, isIncome FROM transactions WHERE 1=1")
+        sums = [i[0] * -1 if i[1] == 0 else i[0] for i in self.cursor.fetchall()]
         sums = list(set(sums))
-        sums.sort()
         self.sumFilter = QFTLFilter(max(sums), min(sums), sums)
         self.mainGrid.addWidget(self.sumFilter, 3, 0)
 

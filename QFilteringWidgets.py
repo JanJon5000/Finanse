@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QPushButton
 from PyQt5.QtCore import QDate, Qt, pyqtSignal  
-from PyQt5.QtGui import QPen, QPainter, QColor
+from PyQt5.QtGui import QPen, QPainter, QColor, QDoubleValidator
 from datetime import date
 
 class QListFilter(QWidget):
@@ -67,14 +67,16 @@ class QFromToFilter(QWidget):
         super().__init__()
         # its layout
         self.accesibleLayout = QGridLayout()
+        self.negativeAlertFlag = False
 
         # two cases - date and a number (only those things in my program require that filter to exist)
-        if isinstance(max, int) and isinstance(min, int):
+        if isinstance(max, float) and isinstance(min, float):
             # this syntax is totally unnecesary - i still decided to write it like this, so i would instantly recognize what this is for
             self.flag = int(0)
             # value of a transaction can be negative when it is from the user to someone - thats where abs value comes into play to determine how to create boundaries in the widget
             if abs(min) != min or abs(max) != max:
                 self.ratioDivider = abs(min) + abs(max)
+                self.negativeAlertFlag = True
             else:
                 self.ratioDivider = float(max - min)
             self.maxValue = max
@@ -82,6 +84,7 @@ class QFromToFilter(QWidget):
             
             # lineedits since this is for numbers for the start of the range...
             self.smallerData = QLineEdit()
+            self.smallerData.setValidator(QDoubleValidator(self.minValue, self.maxValue, 2))
             self.smallerData.setPlaceholderText('...Od')
             self.smallerData.textChanged.connect(self.update_color_line)
 
@@ -89,7 +92,7 @@ class QFromToFilter(QWidget):
             self.biggerData = QLineEdit()
             self.biggerData.setPlaceholderText('Do...')
             self.biggerData.textChanged.connect(self.update_color_line)
-
+            
             self.labels = [QLabel(str(self.minValue)), QLabel(str(self.maxValue))]
         
         # date case
@@ -130,11 +133,16 @@ class QFromToFilter(QWidget):
         # function changing the color coverage
         try:
             if self.flag == int(0):
-                start_ratio = float(self.smallerData.text())/self.ratioDivider
-                end_ratio = (float(self.biggerData.text())-self.minValue)/self.ratioDivider
+                if float(self.smallerData.text()) >= 0 and float(self.biggerData.text()) >=0:
+                    start_ratio = float(self.smallerData.text())/self.ratioDivider
+                    end_ratio = (float(self.biggerData.text())-self.minValue)/self.ratioDivider
+                elif float(self.smallerData.text()) < 0 and float(self.biggerData.text()) >= 0:
+                    start_ratio = abs(float(self.smallerData.text()))/self.ratioDivider
+                    end_ratio = abs(float(self.biggerData.text())-self.minValue)/self.ratioDivider
             elif self.flag == date(2000, 2, 2):
                 start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
+            print(start_ratio, end_ratio, self.ratioDivider)
             if 0 <= start_ratio <= end_ratio <= 1:
                 self.DataPresentationLevel.set_line_ratios(start_ratio, end_ratio)
         except ValueError:
