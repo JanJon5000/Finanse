@@ -4,7 +4,7 @@ from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
-from QFilteringWidgets import QFTLFilter, QOrderWidget, QListFilter
+from QFilteringWidgets import QFTLFilter, QListFilter
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -85,7 +85,7 @@ class Program(CORE, QWidget):
         self.mainGrid.addWidget(self.logo, 0, 0)
 
         # widget responsible for how the data is ordered
-        self.orderWidget = QOrderWidget(['data', 'kategoria', 'imie', 'kwota'])
+        self.orderWidget = QLabel('PLACEHOLDER')
         self.mainGrid.addWidget(self.orderWidget, 1, 0)
 
         # widget responsible for determining which 'date range' is supposed to be shown

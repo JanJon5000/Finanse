@@ -1,21 +1,20 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QCheckBox, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QPushButton
 from PyQt5.QtCore import QDate, Qt, pyqtSignal  
 from PyQt5.QtGui import QPen, QPainter, QColor
 from datetime import date
 
 class QListFilter(QWidget):
     def __init__(self, qListValues, parent = None) -> None:
+        # initializer of the parent class
         super().__init__()
         self.qScrollPart = QScrollArea(self)
 
-        # customizing scrollable part - a list
+        # customizing scrollable part - a list with items to be displayed - a user chooses
         self.qScrollPart.setWidgetResizable(True)
         self.qListPart = QListWidget(self)
         self.qListPart.addItems([str(i) for i in qListValues])
+        # user can select multiple
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
-        for i in range(self.qListPart.count()):
-            item = self.qListPart.item(i)
-            item.setSelected(True)
 
         self.qScrollPart.setWidget(self.qListPart)
 
@@ -27,11 +26,14 @@ class QListFilter(QWidget):
 
 class QColorLineWidget(QWidget):
     def __init__(self):
+        # a line-object that changes its part size that is colored with a function
         super().__init__()
-        self.color = QColor(64, 255, 100)
+        # colored part will be in this color
+        self.color = QColor(149, 69, 133)
         self.start_ratio = 0  # Initial start position ratio (0.0 to 1.0)
         self.end_ratio = 1 # Initial end position ratio (0.0 to 1.0)
 
+    # overwritten function of paintEvent which ocurs when the object is painted (displayed) 
     def paintEvent(self, event):
         painter = QPainter(self)
         pen = QPen()
@@ -42,17 +44,18 @@ class QColorLineWidget(QWidget):
         start_pos = int(self.start_ratio * width)
         end_pos = int(self.end_ratio * width)
 
-        # Draw colored segment
+        # draw colored segment
         pen.setColor(self.color)
         painter.setPen(pen)
         painter.drawLine(start_pos, self.height() // 2, end_pos, self.height() // 2)
 
-        # Draw the rest of the line in black
-        pen.setColor(QColor(0, 100, 100))
+        # draw the rest of the line in this color
+        pen.setColor(QColor(255, 125, 0))
         painter.setPen(pen)
         painter.drawLine(0, self.height() // 2, start_pos, self.height() // 2)
         painter.drawLine(end_pos, self.height() // 2, width, self.height() // 2)
 
+    # function that changes the size of colored fragment
     def set_line_ratios(self, start_ratio, end_ratio):
         self.start_ratio = start_ratio
         self.end_ratio = end_ratio
@@ -60,11 +63,16 @@ class QColorLineWidget(QWidget):
 
 class QFromToFilter(QWidget):
     def __init__(self, max: float, min: float) -> None:
+        # a filter that can filer data in a range - if the user wants data from X value to Y value, they will use this
         super().__init__()
+        # its layout
         self.accesibleLayout = QGridLayout()
 
+        # two cases - date and a number (only those things in my program require that filter to exist)
         if isinstance(max, int) and isinstance(min, int):
+            # this syntax is totally unnecesary - i still decided to write it like this, so i would instantly recognize what this is for
             self.flag = int(0)
+            # value of a transaction can be negative when it is from the user to someone - thats where abs value comes into play to determine how to create boundaries in the widget
             if abs(min) != min or abs(max) != max:
                 self.ratioDivider = abs(min) + abs(max)
             else:
@@ -72,23 +80,29 @@ class QFromToFilter(QWidget):
             self.maxValue = max
             self.minValue = min
             
+            # lineedits since this is for numbers for the start of the range...
             self.smallerData = QLineEdit()
             self.smallerData.setPlaceholderText('...Od')
             self.smallerData.textChanged.connect(self.update_color_line)
 
+            # ... and for the end of the range
             self.biggerData = QLineEdit()
             self.biggerData.setPlaceholderText('Do...')
             self.biggerData.textChanged.connect(self.update_color_line)
 
             self.labels = [QLabel(str(self.minValue)), QLabel(str(self.maxValue))]
-
+        
+        # date case
         if isinstance(min, date) and isinstance(max, date):
+            # flag variable for later
             self.flag = date(2000, 2, 2)
             self.labels = [QLabel(str(min)), QLabel(str(max))]
+            # cast it to a number
             self.minValue = min.toordinal()
             self.maxValue = max.toordinal()
             self.ratioDivider = float(self.maxValue - self.minValue)
 
+            # date edits to enter a start of a range and an end of one
             self.smallerData = QDateEdit()
             self.smallerData.setDate(min)
             self.smallerData.dateChanged.connect(self.update_color_line)
@@ -99,8 +113,10 @@ class QFromToFilter(QWidget):
             self.biggerData.dateChanged.connect(self.update_color_line)
             self.biggerData.setDisplayFormat('yyyy-MM-dd')
 
+        # variable able to graphically represent the range
         self.DataPresentationLevel = QColorLineWidget()
 
+        # a layout of the widget
         self.accesibleLayout = QGridLayout()
         self.accesibleLayout.addWidget(self.labels[0], 0, 0)
         self.accesibleLayout.addWidget(self.DataPresentationLevel, 0, 1, 1, 2)
@@ -111,28 +127,26 @@ class QFromToFilter(QWidget):
         self.setLayout(self.accesibleLayout)
 
     def update_color_line(self):
+        # function changing the color coverage
         try:
             if self.flag == int(0):
                 start_ratio = float(self.smallerData.text())/self.ratioDivider
                 end_ratio = (float(self.biggerData.text())-self.minValue)/self.ratioDivider
             elif self.flag == date(2000, 2, 2):
-                try:
-                    print(f'tutaj! {self.i+1}')
-                    self.i += 1
-                except:
-                    self.i = 0
                 start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
-                print(start_ratio, self.ratioDivider)
             if 0 <= start_ratio <= end_ratio <= 1:
                 self.DataPresentationLevel.set_line_ratios(start_ratio, end_ratio)
         except ValueError:
             pass  # Ignore invalid input
 
 class QFTLFilter(QWidget):
+    # a filter class combining the two QFromToFilter and QListFilter - for date and money filtering purposes
     def __init__(self, max, min, listOfValues) -> None:
         super().__init__()
+        # a layout of the widget
         self.accesibleLayout = QVBoxLayout()
+        # variables for later use so the widget wont bug/crush
         self.forLaterVals = [max, min, listOfValues]
         self.flag = 0
 
@@ -141,9 +155,11 @@ class QFTLFilter(QWidget):
         self.setLayout(self.accesibleLayout)
         
     def populate_grid(self) -> None:
+        # function filling up the grid of the widget
         self.qComboComponent = QComboBox()
+        # a combobox which by the user chooses which filter widget they want to filter the data with
         self.qComboComponent.addItems(['Zakres', 'Konkretne wartości'])
-        self.qComboComponent.setCurrentIndex(self.flag) 
+        self.qComboComponent.setCurrentIndex(self.flag)
         self.qComboComponent.currentIndexChanged.connect(self.refresh)
         
         self.currentFilter = [QFromToFilter(self.forLaterVals[0], self.forLaterVals[1]), QListFilter(qListValues=self.forLaterVals[2])]
@@ -154,6 +170,7 @@ class QFTLFilter(QWidget):
             self.setStyleSheet(style)
 
     def refresh(self) -> None:
+        # function that refreshes the grid
         self.flag = not self.flag
         self.clear_layout(self.accesibleLayout)
         self.populate_grid()
@@ -168,45 +185,13 @@ class QFTLFilter(QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
-class QOrderWidget(QWidget):
-    def __init__(self, parameters) -> None:
+class QOrderWidget(QPushButton):
+    # a class that will be used for ordering purposses
+    def __init__(self, name: str) -> None:
         super().__init__()
-        self.lay = QVBoxLayout()
-        self.flag = 0
-        self.paramList = parameters
-
-        self.activatedLayout = ''
-        self.disactivatedLayout = ''
-
-        with open('styleSHEETS/qorder_stylesheet.qss', 'r') as file:
-            style = file.read()
-            self.setStyleSheet(style)
-        self.populateGrid()
-
-    def populateGrid(self) -> None:
-        self.infoLabel = QLabel('niestandardowe sortowanie:')
-        
-        self.checkBox = QCheckBox()
-        self.checkBox.stateChanged.connect(self.onChecked)
-        
-        self.dragDropList = QListWidget()
-        self.dragDropList.setDragDropMode(QListWidget.InternalMove)
-        self.dragDropList.addItems(self.paramList)
-
-        self.innerLayout = QHBoxLayout()
-        self.innerLayout.addWidget(self.infoLabel)
-        self.innerLayout.addWidget(self.checkBox)
-        self.innerWidg = QWidget()
-        self.innerWidg.setLayout(self.innerLayout)
-
-        self.lay.addWidget(self.innerWidg)
-        self.lay.addWidget(self.dragDropList)
-
-        self.setLayout(self.lay)
-
-    def onChecked(self):
-        if self.checkBox.isChecked():
-            self.dragDropList.setEnabled(True)
-        else:
-            self.dragDropList.setEnabled(False)
-        self.update()
+        self.setFlat(True)
+        self.setText(name)
+        self.clicked.connect(self.whenClicked)
+    
+    def whenClicked(self):
+        pass
