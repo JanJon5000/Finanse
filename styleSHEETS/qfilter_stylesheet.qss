@@ -5,8 +5,7 @@ QWidget {
 }
 
 QLabel {
-    border: 2px solid #A9A9A9;
-    border-radius: 4px;
+    border: None;
 }
 
 QPushButton {
@@ -31,4 +30,20 @@ QDateEdit::up-arrow {
     image: url(IMG/arrUP.png);
     width: 24px;
     height: 24px;
+}
+
+#applyButton {
+    border: None;
+}
+
+#applyButton QPushButton{
+    color: #ffffff;
+    background-color: #0000ff;
+}
+
+#range {
+    font-size: 10px;
+    color: #d3d3d3; /* Biały kolor tekstu */
+    padding: 0px;
+    margin: 0px;
 }

@@ -85,16 +85,17 @@ class QFromToFilter(QWidget):
             # lineedits since this is for numbers for the start of the range...
             self.smallerData = QLineEdit()
             self.smallerData.setValidator(QDoubleValidator(self.minValue, self.maxValue, 2))
-            self.smallerData.setPlaceholderText('...Od')
+            self.smallerData.setPlaceholderText('Od...')
             self.smallerData.textChanged.connect(self.update_color_line)
 
             # ... and for the end of the range
             self.biggerData = QLineEdit()
-            self.biggerData.setPlaceholderText('Do...')
+            self.smallerData.setValidator(QDoubleValidator(self.minValue, self.maxValue, 2))
+            self.biggerData.setPlaceholderText('...Do')
             self.biggerData.textChanged.connect(self.update_color_line)
             
             self.labels = [QLabel(str(self.minValue)), QLabel(str(self.maxValue))]
-        
+            
         # date case
         if isinstance(min, date) and isinstance(max, date):
             # flag variable for later
@@ -107,25 +108,32 @@ class QFromToFilter(QWidget):
 
             # date edits to enter a start of a range and an end of one
             self.smallerData = QDateEdit()
+            self.smallerData.setMaximumDate(max)
+            self.smallerData.setMinimumDate(min)
             self.smallerData.setDate(min)
             self.smallerData.dateChanged.connect(self.update_color_line)
             self.smallerData.setDisplayFormat('yyyy-MM-dd')
             
             self.biggerData = QDateEdit()
+            self.biggerData.setMaximumDate(max)
+            self.biggerData.setMinimumDate(min)
             self.biggerData.setDate(max)
             self.biggerData.dateChanged.connect(self.update_color_line)
             self.biggerData.setDisplayFormat('yyyy-MM-dd')
 
         # variable able to graphically represent the range
         self.DataPresentationLevel = QColorLineWidget()
-
+        self.DataPresentationLevel.setMinimumHeight(10)
+        
+        self.labels[0].setObjectName('range')
+        self.labels[1].setObjectName('range')
         # a layout of the widget
         self.accesibleLayout = QGridLayout()
         self.accesibleLayout.addWidget(self.labels[0], 0, 0)
-        self.accesibleLayout.addWidget(self.DataPresentationLevel, 0, 1, 1, 2)
         self.accesibleLayout.addWidget(self.labels[1], 0, 3)
-        self.accesibleLayout.addWidget(self.smallerData, 1, 0, 1, 2)
-        self.accesibleLayout.addWidget(self.biggerData, 1, 2, 1, 2)
+        self.accesibleLayout.addWidget(self.DataPresentationLevel, 1, 0, 1, 4)
+        self.accesibleLayout.addWidget(self.smallerData, 2, 0, 1, 2)
+        self.accesibleLayout.addWidget(self.biggerData, 2, 2, 1, 2)
 
         self.setLayout(self.accesibleLayout)
 
@@ -133,16 +141,24 @@ class QFromToFilter(QWidget):
         # function changing the color coverage
         try:
             if self.flag == int(0):
-                if float(self.smallerData.text()) >= 0 and float(self.biggerData.text()) >=0:
-                    start_ratio = float(self.smallerData.text())/self.ratioDivider
-                    end_ratio = (float(self.biggerData.text())-self.minValue)/self.ratioDivider
-                elif float(self.smallerData.text()) < 0 and float(self.biggerData.text()) >= 0:
-                    start_ratio = abs(float(self.smallerData.text()))/self.ratioDivider
-                    end_ratio = abs(float(self.biggerData.text())-self.minValue)/self.ratioDivider
+                smaller_value = float(self.smallerData.text())
+                bigger_value = float(self.biggerData.text())
+
+                if smaller_value >= 0 and bigger_value >= 0:
+                    # both inputs are positive
+                    start_ratio = (smaller_value - self.minValue) / self.ratioDivider
+                    end_ratio = (bigger_value - self.minValue) / self.ratioDivider
+                elif smaller_value < 0 and bigger_value < 0:
+                    # both negative
+                    start_ratio = abs(smaller_value - self.minValue) / self.ratioDivider
+                    end_ratio = abs(bigger_value - self.minValue) / self.ratioDivider
+                elif smaller_value < 0 < bigger_value:
+                    # one negative one positive
+                    start_ratio = (smaller_value - self.minValue) / self.ratioDivider
+                end_ratio = (bigger_value - self.minValue) / self.ratioDivider
             elif self.flag == date(2000, 2, 2):
                 start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
-            print(start_ratio, end_ratio, self.ratioDivider)
             if 0 <= start_ratio <= end_ratio <= 1:
                 self.DataPresentationLevel.set_line_ratios(start_ratio, end_ratio)
         except ValueError:
@@ -173,9 +189,6 @@ class QFTLFilter(QWidget):
         self.currentFilter = [QFromToFilter(self.forLaterVals[0], self.forLaterVals[1]), QListFilter(qListValues=self.forLaterVals[2])]
         self.accesibleLayout.addWidget(self.qComboComponent)
         self.accesibleLayout.addWidget(self.currentFilter[self.flag])
-        with open('styleSHEETS/qfilter_stylesheet.qss', 'r') as file:
-            style = file.read()
-            self.setStyleSheet(style)
 
     def refresh(self) -> None:
         # function that refreshes the grid
@@ -193,13 +206,17 @@ class QFTLFilter(QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
-class QOrderWidget(QPushButton):
-    # a class that will be used for ordering purposses
+class QOrderButton(QPushButton):
+    # a class that will be used for ordering purposses of only one thing
     def __init__(self, name: str) -> None:
         super().__init__()
         self.setFlat(True)
         self.setText(name)
-        self.clicked.connect(self.whenClicked)
+        self.clicked.connect(self.changeMode)
     
-    def whenClicked(self):
-        pass
+    def changeMode(self):
+        print('test')
+
+class QOrderBoard(QWidget):
+    # a class for ordering all the data - contains a number of order buttons
+    pass

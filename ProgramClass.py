@@ -1,7 +1,7 @@
 import sqlite3 as sql
 from datetime import date
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout ,QApplication, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter
@@ -80,13 +80,11 @@ class Program(CORE, QWidget):
 
     def populate_grid(self) -> None:
         ############        FILTERS AND SETTINGS - COLUMN 0
-        # 'watermark' of my app
-        self.logo = QLabel('LOGO')
-        self.mainGrid.addWidget(self.logo, 0, 0)
-
+        # That column is its own widget since it has to have its own setting as a group
         # widget responsible for how the data is ordered
-        self.orderWidget = QLabel('PLACEHOLDER')
-        self.mainGrid.addWidget(self.orderWidget, 1, 0)
+        self.consolidatedFilterWidget = QWidget()
+        self.consolidatedFilterWidget.setMaximumWidth(300)
+        self.filterLayout = QVBoxLayout()
 
         # widget responsible for determining which 'date range' is supposed to be shown
         self.cursor.execute("SELECT date from transactions WHERE 1=1")
@@ -95,36 +93,44 @@ class Program(CORE, QWidget):
         dates = list(set(dates))
         dates.sort()
         self.dataFilter = QFTLFilter(max(dates), min(dates), dates)
-        self.mainGrid.addWidget(self.dataFilter, 2, 0)
+        self.filterLayout.addWidget(self.dataFilter)
 
-        # PLACEHOLDER widget responsible for determining which 'ammount range' is supposed to be displayed
+        # widget responsible for determining which 'ammount range' is supposed to be displayed
         self.cursor.execute("SELECT money, isIncome FROM transactions WHERE 1=1")
         sums = [i[0] * -1 if i[1] == 0 else i[0] for i in self.cursor.fetchall()]
         sums = list(set(sums))
+        sums.sort()
         self.sumFilter = QFTLFilter(max(sums), min(sums), sums)
-        self.mainGrid.addWidget(self.sumFilter, 3, 0)
+        self.filterLayout.addWidget(self.sumFilter)
 
-        # PLACEHOLDER widget responsible for determining which categories are supposed to be displayed
+        # widget responsible for determining which categories are supposed to be displayed
         self.cursor.execute('SELECT name FROM categories WHERE 1=1')
         cats = [i[0] for i in list(set(self.cursor.fetchall()))]
         self.categoryFilter = QListFilter(cats)
-        self.mainGrid.addWidget(self.categoryFilter, 4, 0)
+        self.filterLayout.addWidget(self.categoryFilter)
 
         # QlineEdit setting the number of records to be displayed
         self.recordFilter = QLineEdit(self)
         self.recordFilter.setMaxLength(2)
         self.recordFilter.textChanged.connect(self.change_record_num)
-        self.mainGrid.addWidget(self.recordFilter, 5, 0)
+        self.filterLayout.addWidget(self.recordFilter)
 
-        # PLACEHOLDER buttons for deleting, applying filters and removing filters
-        self.settingButtons = [QPushButton(text) for text in ('usuń', 'zastosuj', 'przywróc')]
-        buttonLayout = QVBoxLayout()
-        for b in self.settingButtons:
-            buttonLayout.addWidget(b)
-        buttonWidget = QWidget()
-        buttonWidget.setLayout(buttonLayout)
-        self.mainGrid.addWidget(buttonWidget, 6, 0)
+        # PLACEHOLDER button applying filters
+        self.applyLabel = QLabel('')
+        self.applyButton = QPushButton("zastosuj")
+        self.applywWidget = QWidget()
+        self.applyLayout = QHBoxLayout()
+        self.applyLayout.addWidget(self.applyLabel)
+        self.applyLayout.addWidget(self.applyButton)
+        self.applywWidget.setLayout(self.applyLayout)
+        self.applywWidget.setObjectName('applyButton')
+        self.filterLayout.addWidget(self.applywWidget)
 
+        self.consolidatedFilterWidget.setLayout(self.filterLayout)
+        with open("styleSHEETS/qfilter_stylesheet.qss", 'r') as file:
+            style = file.read()
+            self.consolidatedFilterWidget.setStyleSheet(style)
+        self.mainGrid.addWidget(self.consolidatedFilterWidget, 0, 0, 7, 1)
         ############        OTHER - ROW 0
         # a button which opens up a dialog window with ability to add new data to db
         self.adderButton = QPushButton('dodaj tranzakcje', self)
