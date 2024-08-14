@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtCore import QDate, Qt, pyqtSignal  
 from PyQt5.QtGui import QPen, QPainter, QColor, QDoubleValidator
 from datetime import date
@@ -141,8 +141,15 @@ class QFromToFilter(QWidget):
         # function changing the color coverage
         try:
             if self.flag == int(0):
-                smaller_value = float(self.smallerData.text())
-                bigger_value = float(self.biggerData.text())
+                if self.smallerData.text() != '' and self.biggerData.text() != '' or self.smallerData.text() == '' and self.biggerData.text() == '':
+                    smaller_value = float(self.smallerData.text())
+                    bigger_value = float(self.biggerData.text())
+                elif self.smallerData.text() == '' and self.biggerData.text() != '':
+                    smaller_value = self.minValue
+                    bigger_value = float(self.biggerData.text())
+                elif self.smallerData.text() != '' and self.biggerData.text() == '':
+                    smaller_value = float(self.smallerData.text())
+                    bigger_value = self.maxValue
 
                 if smaller_value >= 0 and bigger_value >= 0:
                     # both inputs are positive
@@ -155,7 +162,8 @@ class QFromToFilter(QWidget):
                 elif smaller_value < 0 < bigger_value:
                     # one negative one positive
                     start_ratio = (smaller_value - self.minValue) / self.ratioDivider
-                end_ratio = (bigger_value - self.minValue) / self.ratioDivider
+                    end_ratio = (bigger_value - self.minValue) / self.ratioDivider
+                
             elif self.flag == date(2000, 2, 2):
                 start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
@@ -218,5 +226,11 @@ class QOrderButton(QPushButton):
         print('test')
 
 class QOrderBoard(QWidget):
-    # a class for ordering all the data - contains a number of order buttons
-    pass
+    # a class for ordering all the data - board of order buttons
+    def __init__(self) -> None:
+        super().__init__()
+        self.mainLayout = QHBoxLayout()
+        self.buttons = [QOrderButton(text) for text in ['Nazwa', 'Kategoria', 'Kwota', 'Data']]
+        for but in self.buttons:
+            self.mainLayout.addWidget(but)
+        self.setLayout(self.mainLayout)
