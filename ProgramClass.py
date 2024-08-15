@@ -86,7 +86,6 @@ class Program(CORE, QWidget):
                         if isinstance(dataWidg, QListFilter):
                             lst.append(dataWidg.qListPart.selectedItems())
                         elif isinstance(dataWidg, QFromToFilter):
-                            print('tutaj')
                             if isinstance(dataWidg.smallerData, QLineEdit):
                                 lst.append([dataWidg.smallerData.text(), dataWidg.biggerData.text()])
                             elif isinstance(dataWidg.smallerData, QDateEdit):
@@ -114,12 +113,11 @@ class Program(CORE, QWidget):
         dates = [date(int(i[0:4]), int(i[5:7]), int(i[8:])) for i in dates]
         dates = list(set(dates))
         dates.sort()
-        if 'dates' not in list(self.filterContents.keys()):
+        if 'transactions.date' not in list(self.filterContents.keys()):
             self.dataFilter = QFTLFilter(max(dates), min(dates), dates, 0)
-            self.dataFilter.setObjectName('dates')
         else:
-            self.dataFilter = QFTLFilter(max(dates), min(dates), dates, self.filterContents['dates'][0])
-            self.dataFilter.setObjectName('dates')
+            self.dataFilter = QFTLFilter(max(dates), min(dates), dates, self.filterContents['transactions.date'][0])
+        self.dataFilter.setObjectName('transactions.date')
         self.filterLayout.addWidget(self.dataFilter)
 
         # widget responsible for determining which 'ammount range' is supposed to be displayed
@@ -128,15 +126,23 @@ class Program(CORE, QWidget):
         sums = list(set(sums))
         sums.sort()
         self.sumFilter = QFTLFilter(max(sums), min(sums), sums, 0)
-        self.sumFilter.setObjectName('sums')
+        self.sumFilter.setObjectName('transactions.money')
         self.filterLayout.addWidget(self.sumFilter)
 
         # widget responsible for determining which categories are supposed to be displayed
         self.cursor.execute('SELECT name FROM categories WHERE 1=1')
         cats = [i[0] for i in list(set(self.cursor.fetchall()))]
+        cats.sort()
         self.categoryFilter = QListFilter(cats)
-        self.categoryFilter.setObjectName('categories')
+        self.categoryFilter.setObjectName('categories.name')
         self.filterLayout.addWidget(self.categoryFilter)
+        
+        # widget responsible for determining which names are supposed to be displayed
+        self.cursor.execute('SELECT personName FROM people WHERE 1=1')
+        people = [i[0] for i in list(set(self.cursor.fetchall()))]
+        self.peopleFilter = QListFilter(people)
+        self.peopleFilter.setObjectName('people.PersonName')
+        self.filterLayout.addWidget(self.peopleFilter)
 
         # QlineEdit setting the number of records to be displayed
         self.recordFilter = QLineEdit(self)
