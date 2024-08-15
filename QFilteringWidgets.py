@@ -8,11 +8,11 @@ class QListFilter(QWidget):
         # initializer of the parent class
         super().__init__()
         self.qScrollPart = QScrollArea(self)
-
+        self.content = [str(i) for i in qListValues]
         # customizing scrollable part - a list with items to be displayed - a user chooses
         self.qScrollPart.setWidgetResizable(True)
         self.qListPart = QListWidget(self)
-        self.qListPart.addItems([str(i) for i in qListValues])
+        self.qListPart.addItems(self.content)
         # user can select multiple
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
 
@@ -174,13 +174,13 @@ class QFromToFilter(QWidget):
 
 class QFTLFilter(QWidget):
     # a filter class combining the two QFromToFilter and QListFilter - for date and money filtering purposes
-    def __init__(self, max, min, listOfValues) -> None:
+    def __init__(self, max: float, min: float, listOfValues: list, state: bool) -> None:
         super().__init__()
         # a layout of the widget
         self.accesibleLayout = QVBoxLayout()
         # variables for later use so the widget wont bug/crush
         self.forLaterVals = [max, min, listOfValues]
-        self.flag = 0
+        self.flag = state
 
         self.populate_grid()
         

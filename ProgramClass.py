@@ -1,10 +1,10 @@
 import sqlite3 as sql
 from datetime import date
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout, QDateEdit
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
-from QFilteringWidgets import QFTLFilter, QListFilter
+from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -61,6 +61,7 @@ class Program(CORE, QWidget):
         self.settings["width"] = placeholder[1]
         self.settings["rowNumber"] = placeholder[2]
         self.orderFilters = []
+        self.filterContents = dict()
         #setting the layout to grid
         self.mainGrid = QGridLayout()
         self.populate_grid()
@@ -70,11 +71,30 @@ class Program(CORE, QWidget):
 
     #function cleaning the grid
     def clear_layout(self, layout):
+        self.filterContents = dict()
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
+                if child.widget().objectName() == 'filterStatus':
+                    self.clear_layout(child.widget().layout())
                 if child.widget() is not None:
                     child.widget().deleteLater()
+                    if isinstance(child.widget(), QFTLFilter):
+                        lst = [child.widget().flag]
+                        self.filterContents[child.widget().objectName()] = lst
+                        dataWidg = child.widget().layout().itemAt(1).widget()
+                        if isinstance(dataWidg, QListFilter):
+                            lst.append(dataWidg.qListPart.selectedItems())
+                        elif isinstance(dataWidg, QFromToFilter):
+                            print('tutaj')
+                            if isinstance(dataWidg.smallerData, QLineEdit):
+                                lst.append([dataWidg.smallerData.text(), dataWidg.biggerData.text()])
+                            elif isinstance(dataWidg.smallerData, QDateEdit):
+                                lst.append([dataWidg.smallerData.date(), dataWidg.biggerData.date()])
+                        self.filterContents[child.widget().objectName()] = lst
+                    elif isinstance(child.widget(), QListFilter):
+                        lst = [child.widget().qListPart.selectedItems()]
+                        self.filterContents[child.widget().objectName()] = lst
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
@@ -82,8 +102,10 @@ class Program(CORE, QWidget):
         ############        FILTERS AND SETTINGS - COLUMN 0
         # That column is its own widget since it has to have its own setting as a group
         # widget responsible for how the data is ordered
+        print(self.filterContents)
         self.consolidatedFilterWidget = QWidget()
         self.consolidatedFilterWidget.setMaximumWidth(300)
+        self.consolidatedFilterWidget.setObjectName('filterStatus')
         self.filterLayout = QVBoxLayout()
 
         # widget responsible for determining which 'date range' is supposed to be shown
@@ -92,7 +114,12 @@ class Program(CORE, QWidget):
         dates = [date(int(i[0:4]), int(i[5:7]), int(i[8:])) for i in dates]
         dates = list(set(dates))
         dates.sort()
-        self.dataFilter = QFTLFilter(max(dates), min(dates), dates)
+        if 'dates' not in list(self.filterContents.keys()):
+            self.dataFilter = QFTLFilter(max(dates), min(dates), dates, 0)
+            self.dataFilter.setObjectName('dates')
+        else:
+            self.dataFilter = QFTLFilter(max(dates), min(dates), dates, self.filterContents['dates'][0])
+            self.dataFilter.setObjectName('dates')
         self.filterLayout.addWidget(self.dataFilter)
 
         # widget responsible for determining which 'ammount range' is supposed to be displayed
@@ -100,13 +127,15 @@ class Program(CORE, QWidget):
         sums = [i[0] * -1 if i[1] == 0 else i[0] for i in self.cursor.fetchall()]
         sums = list(set(sums))
         sums.sort()
-        self.sumFilter = QFTLFilter(max(sums), min(sums), sums)
+        self.sumFilter = QFTLFilter(max(sums), min(sums), sums, 0)
+        self.sumFilter.setObjectName('sums')
         self.filterLayout.addWidget(self.sumFilter)
 
         # widget responsible for determining which categories are supposed to be displayed
         self.cursor.execute('SELECT name FROM categories WHERE 1=1')
         cats = [i[0] for i in list(set(self.cursor.fetchall()))]
         self.categoryFilter = QListFilter(cats)
+        self.categoryFilter.setObjectName('categories')
         self.filterLayout.addWidget(self.categoryFilter)
 
         # QlineEdit setting the number of records to be displayed
@@ -115,9 +144,10 @@ class Program(CORE, QWidget):
         self.recordFilter.textChanged.connect(self.change_record_num)
         self.filterLayout.addWidget(self.recordFilter)
 
-        # PLACEHOLDER button applying filters
+        # button applying filters
         self.applyLabel = QLabel('')
         self.applyButton = QPushButton("zastosuj")
+        self.applyButton.clicked.connect(self.refresh)
         self.applywWidget = QWidget()
         self.applyLayout = QHBoxLayout()
         self.applyLayout.addWidget(self.applyLabel)
