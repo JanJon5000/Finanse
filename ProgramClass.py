@@ -37,7 +37,7 @@ class CORE(SQL_SINGLE_INSTANCE):
                 if element[1] == 1: command += ' ASC '
                 else: command += " DESC "
         command += f" LIMIT {limit};"
-        print(command)
+        # print(command)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
 
@@ -84,7 +84,7 @@ class Program(CORE, QWidget):
                         self.filterContents[child.widget().objectName()] = lst
                         dataWidg = child.widget().layout().itemAt(1).widget()
                         if isinstance(dataWidg, QListFilter):
-                            lst.append(dataWidg.qListPart.selectedItems())
+                            lst.append([item.text() for item in dataWidg.qListPart.selectedItems()])
                         elif isinstance(dataWidg, QFromToFilter):
                             if isinstance(dataWidg.smallerData, QLineEdit):
                                 lst.append([dataWidg.smallerData.text(), dataWidg.biggerData.text()])
@@ -92,7 +92,7 @@ class Program(CORE, QWidget):
                                 lst.append([dataWidg.smallerData.date(), dataWidg.biggerData.date()])
                         self.filterContents[child.widget().objectName()] = lst
                     elif isinstance(child.widget(), QListFilter):
-                        lst = [child.widget().qListPart.selectedItems()]
+                        lst = [item.text() for item in child.widget().qListPart.selectedItems()]
                         self.filterContents[child.widget().objectName()] = lst
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
@@ -117,6 +117,7 @@ class Program(CORE, QWidget):
             self.dataFilter = QFTLFilter(max(dates), min(dates), dates, 0)
         else:
             self.dataFilter = QFTLFilter(max(dates), min(dates), dates, self.filterContents['transactions.date'][0])
+            self.dataFilter.currentFilter[self.filterContents['transactions.date'][0]].select_items(self.filterContents['transactions.date'][1])
         self.dataFilter.setObjectName('transactions.date')
         self.filterLayout.addWidget(self.dataFilter)
 
@@ -125,7 +126,11 @@ class Program(CORE, QWidget):
         sums = [i[0] * -1 if i[1] == 0 else i[0] for i in self.cursor.fetchall()]
         sums = list(set(sums))
         sums.sort()
-        self.sumFilter = QFTLFilter(max(sums), min(sums), sums, 0)
+        if 'transactions.money' not in list(self.filterContents.keys()):
+            self.sumFilter = QFTLFilter(max(sums), min(sums), sums, 0)
+        else:
+            self.sumFilter = QFTLFilter(max(sums), min(sums), sums, self.filterContents['transactions.money'][0])
+            self.sumFilter.currentFilter[self.filterContents['transactions.money'][0]].select_items(self.filterContents['transactions.money'][1])
         self.sumFilter.setObjectName('transactions.money')
         self.filterLayout.addWidget(self.sumFilter)
 
@@ -134,6 +139,8 @@ class Program(CORE, QWidget):
         cats = [i[0] for i in list(set(self.cursor.fetchall()))]
         cats.sort()
         self.categoryFilter = QListFilter(cats)
+        if 'categories.name' in list(self.filterContents.keys()):
+            self.categoryFilter.select_items(self.filterContents['categories.name'])
         self.categoryFilter.setObjectName('categories.name')
         self.filterLayout.addWidget(self.categoryFilter)
         
@@ -141,6 +148,8 @@ class Program(CORE, QWidget):
         self.cursor.execute('SELECT personName FROM people WHERE 1=1')
         people = [i[0] for i in list(set(self.cursor.fetchall()))]
         self.peopleFilter = QListFilter(people)
+        if 'people.PersonName' in list(self.filterContents.keys()):
+            self.peopleFilter.select_items(self.filterContents['people.PersonName'])
         self.peopleFilter.setObjectName('people.PersonName')
         self.filterLayout.addWidget(self.peopleFilter)
 

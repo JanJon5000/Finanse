@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPen, QPainter, QColor, QDoubleValidator
 from datetime import date
 
 class QListFilter(QWidget):
-    def __init__(self, qListValues, parent = None) -> None:
+    def __init__(self, qListValues) -> None:
         # initializer of the parent class
         super().__init__()
         self.qScrollPart = QScrollArea(self)
@@ -24,12 +24,20 @@ class QListFilter(QWidget):
         
         self.setLayout(self.accesibleLayout)
 
+    def select_items(self, values: list) -> None:
+        for i in range(self.qListPart.count()):
+            item = self.qListPart.item(i)
+            if item.text() in values:
+                item.setSelected(True)
+        self.update()
+
+
 class QColorLineWidget(QWidget):
     def __init__(self):
         # a line-object that changes its part size that is colored with a function
         super().__init__()
         # colored part will be in this color
-        self.color = QColor(149, 69, 133)
+        self.color = QColor(0, 0, 255)
         self.start_ratio = 0  # Initial start position ratio (0.0 to 1.0)
         self.end_ratio = 1 # Initial end position ratio (0.0 to 1.0)
 
@@ -50,7 +58,7 @@ class QColorLineWidget(QWidget):
         painter.drawLine(start_pos, self.height() // 2, end_pos, self.height() // 2)
 
         # draw the rest of the line in this color
-        pen.setColor(QColor(255, 125, 0))
+        pen.setColor(QColor(255, 255, 255))
         painter.setPen(pen)
         painter.drawLine(0, self.height() // 2, start_pos, self.height() // 2)
         painter.drawLine(end_pos, self.height() // 2, width, self.height() // 2)
@@ -171,10 +179,18 @@ class QFromToFilter(QWidget):
                 self.DataPresentationLevel.set_line_ratios(start_ratio, end_ratio)
         except ValueError:
             pass  # Ignore invalid input
+    
+    def select_items(self, values: list) -> None:
+        try:
+            self.smallerData.setText(values[0])
+            self.biggerData.setText(values[1])
+        except:
+            self.smallerData.setDate(values[0])
+            self.biggerData.setDate(values[1])
 
 class QFTLFilter(QWidget):
     # a filter class combining the two QFromToFilter and QListFilter - for date and money filtering purposes
-    def __init__(self, max: float, min: float, listOfValues: list, state: bool) -> None:
+    def __init__(self, max: float, min: float, listOfValues: list, state: bool, reload=False) -> None:
         super().__init__()
         # a layout of the widget
         self.accesibleLayout = QVBoxLayout()
