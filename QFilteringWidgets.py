@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtCore import QDate, Qt, pyqtSignal  
-from PyQt5.QtGui import QPen, QPainter, QColor, QDoubleValidator
+from PyQt5.QtGui import QFocusEvent, QMouseEvent, QPen, QPainter, QColor, QDoubleValidator
 from datetime import date
-
+    
 class QListFilter(QWidget):
     def __init__(self, qListValues) -> None:
         # initializer of the parent class
@@ -11,7 +11,7 @@ class QListFilter(QWidget):
         self.content = [str(i) for i in qListValues]
         # customizing scrollable part - a list with items to be displayed - a user chooses
         self.qScrollPart.setWidgetResizable(True)
-        self.qListPart = QListWidget(self)
+        self.qListPart = QListWidget()
         self.qListPart.addItems(self.content)
         # user can select multiple
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
@@ -30,7 +30,7 @@ class QListFilter(QWidget):
             if item.text() in values:
                 item.setSelected(True)
         self.update()
-
+        
 
 class QColorLineWidget(QWidget):
     def __init__(self):
@@ -149,7 +149,7 @@ class QFromToFilter(QWidget):
         # function changing the color coverage
         try:
             if self.flag == int(0):
-                if self.smallerData.text() != '' and self.biggerData.text() != '' or self.smallerData.text() == '' and self.biggerData.text() == '':
+                if self.smallerData.text() != '' and self.biggerData.text() != '':
                     smaller_value = float(self.smallerData.text())
                     bigger_value = float(self.biggerData.text())
                 elif self.smallerData.text() == '' and self.biggerData.text() != '':
@@ -158,7 +158,9 @@ class QFromToFilter(QWidget):
                 elif self.smallerData.text() != '' and self.biggerData.text() == '':
                     smaller_value = float(self.smallerData.text())
                     bigger_value = self.maxValue
-
+                elif self.smallerData.text() == '' and self.biggerData.text() == '':
+                    smaller_value = self.minValue
+                    bigger_value = self.maxValue
                 if smaller_value >= 0 and bigger_value >= 0:
                     # both inputs are positive
                     start_ratio = (smaller_value - self.minValue) / self.ratioDivider

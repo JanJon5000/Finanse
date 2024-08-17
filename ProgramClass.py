@@ -97,11 +97,15 @@ class Program(CORE, QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
+    def activateAll(self) -> None:
+        for item in [self.dataFilter, self.sumFilter, self.categoryFilter, self.peopleFilter]:
+            item.setDisabled(False)
+        self.update()
+
     def populate_grid(self) -> None:
         ############        FILTERS AND SETTINGS - COLUMN 0
         # That column is its own widget since it has to have its own setting as a group
         # widget responsible for how the data is ordered
-        print(self.filterContents)
         self.consolidatedFilterWidget = QWidget()
         self.consolidatedFilterWidget.setMaximumWidth(300)
         self.consolidatedFilterWidget.setObjectName('filterStatus')
