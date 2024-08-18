@@ -1,10 +1,11 @@
 import sqlite3 as sql
 from datetime import date
-from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint
+from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint, QDate
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout, QDateEdit
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter
+from pprint import pprint
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -13,19 +14,17 @@ class CORE(SQL_SINGLE_INSTANCE):
         self.shownContent = list()
         
     def show_table(self, filters: dict, orderFilters: list,  limit: int) -> None:
-        command = "SELECT people.personName, categories.name, transactions.money, transactions.date, transactions.isIncome FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
+        command = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         self.filters = filters
         self.orderFilters = orderFilters
+
         if self.filters == dict():
             pass
         else:
             command += " WHERE "
-            for key in self.filters.keys():
-                for i in range(len(self.filters[key])):
-                    command  += f" {key} = {self.filters[key][i]} "
-                    if i != len(self.filters[key])-1:
-                        command += " OR "
-                if key != len(list(self.filters.keys()))-1:
+            for key in list(self.filters.keys()):
+                command += self.filters[key]
+                if list(self.filters.keys()).index(key) != len(list(self.filters.keys()))-1:
                     command += " AND "
 
         if orderFilters == []:
@@ -37,10 +36,10 @@ class CORE(SQL_SINGLE_INSTANCE):
                 if element[1] == 1: command += ' ASC '
                 else: command += " DESC "
         command += f" LIMIT {limit};"
-        # print(command)
+        print(command)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
-
+        print(self.shownContent)
     def show_graph() -> None: 
         pass
 
@@ -97,11 +96,6 @@ class Program(CORE, QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
-    def activateAll(self) -> None:
-        for item in [self.dataFilter, self.sumFilter, self.categoryFilter, self.peopleFilter]:
-            item.setDisabled(False)
-        self.update()
-
     def populate_grid(self) -> None:
         ############        FILTERS AND SETTINGS - COLUMN 0
         # That column is its own widget since it has to have its own setting as a group
@@ -111,12 +105,16 @@ class Program(CORE, QWidget):
         self.consolidatedFilterWidget.setObjectName('filterStatus')
         self.filterLayout = QVBoxLayout()
 
+        # print(self.filterContents)
+
         # widget responsible for determining which 'date range' is supposed to be shown
         self.cursor.execute("SELECT date from transactions WHERE 1=1")
         dates = [tpl[0] for tpl in self.cursor.fetchall()]
         dates = [date(int(i[0:4]), int(i[5:7]), int(i[8:])) for i in dates]
         dates = list(set(dates))
         dates.sort()
+        if dates == []:
+            dates.append(date.today())
         if 'transactions.date' not in list(self.filterContents.keys()):
             self.dataFilter = QFTLFilter(max(dates), min(dates), dates, 0)
         else:
@@ -126,10 +124,12 @@ class Program(CORE, QWidget):
         self.filterLayout.addWidget(self.dataFilter)
 
         # widget responsible for determining which 'ammount range' is supposed to be displayed
-        self.cursor.execute("SELECT money, isIncome FROM transactions WHERE 1=1")
-        sums = [i[0] * -1 if i[1] == 0 else i[0] for i in self.cursor.fetchall()]
+        self.cursor.execute("SELECT money FROM transactions WHERE 1=1")
+        sums = [i[0] for i in self.cursor.fetchall()]
         sums = list(set(sums))
         sums.sort()
+        if sums == []:
+            sums.append(0.0)
         if 'transactions.money' not in list(self.filterContents.keys()):
             self.sumFilter = QFTLFilter(max(sums), min(sums), sums, 0)
         else:
@@ -182,7 +182,7 @@ class Program(CORE, QWidget):
         self.mainGrid.addWidget(self.consolidatedFilterWidget, 0, 0, 7, 1)
         ############        OTHER - ROW 0
         # a button which opens up a dialog window with ability to add new data to db
-        self.adderButton = QPushButton('dodaj tranzakcje', self)
+        self.adderButton = QPushButton('dodaj transakcje', self)
         self.adderButton.clicked.connect(self.showAdderDialog)
         self.mainGrid.addWidget(self.adderButton, 0, 1)
 
@@ -208,7 +208,7 @@ class Program(CORE, QWidget):
                 if i == 1:
                     placeholder.setStyleSheet(f"color: rgb({colors[record[i]][0]}, {colors[record[i]][1]}, {colors[record[i]][2]});")
                 if i == 2:
-                    if record[-1]:
+                    if record[-2] == abs(record[-2]):
                         placeholder.setStyleSheet("color: rgb(0, 255, 0);")
                     else:
                         placeholder = QLabel('-' + str(record[2]), self)
@@ -222,6 +222,40 @@ class Program(CORE, QWidget):
 
     def refresh(self) -> None:
         self.clear_layout(self.mainGrid)
+        self.filters = dict()
+        for key in list(self.filterContents.keys()):
+            if len(self.filterContents[key]) != 0:
+                if (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 0:
+                    if isinstance(self.filterContents[key][1][0], QDate):
+                        self.filters[key] = f" {key} BETWEEN '{self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d')}' AND '{self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d')}' "
+                    elif isinstance(self.filterContents[key][1][0], str):
+                        try:
+                            self.filters[key] = f" {key} BETWEEN {float(self.filterContents[key][1][0])} "
+                        except:
+                            self.filters[key] = f" {key} BETWEEN {float(self.sumFilter.currentFilter[self.sumFilter.flag].minValue)} "
+                        try:
+                            self.filters[key] += f" AND {float(self.filterContents[key][1][1])} "
+                        except:
+                            self.filters[key] += f" AND {float(self.sumFilter.currentFilter[self.sumFilter.flag].maxValue)} "
+                elif (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 1 and len(self.filterContents[key][1]) != 0:
+                    if isinstance(self.filterContents[key][1][0], QDate):
+                        self.filters[key] = ''
+                        for val in self.filterContents[key][1]:
+                            self.filters[key] += f" {key} = '{val.toPyDate().strftime('%Y-%m-%d')}' "
+                            if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
+                                self.filters[key] += " OR "
+                    elif isinstance(self.filterContents[key][1][0], str):
+                        self.filters[key] = ''
+                        for val in self.filterContents[key][1]:
+                            self.filters[key] += f" {key} = {float(val)} "
+                            if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
+                                self.filters[key] += " OR "
+                else:
+                    self.filters[key] = ''
+                    for val in self.filterContents[key]:
+                        self.filters[key] += f" {key} = '{val}' "
+                        if self.filterContents[key].index(val) != len(self.filterContents[key])-1:
+                            self.filters[key] += " OR "
         self.populate_grid()
         self.update()
 

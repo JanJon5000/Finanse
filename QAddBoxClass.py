@@ -19,8 +19,8 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.accessibleLayout = QGridLayout(self)
         self.innerLayout = QGridLayout(self)
         self.qButtonPart = QPushButton("dodaj", self)
-        self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota', 'przychód')]
-        self.qInteractiveComps = [QLineEdit(self), QLineEdit(self), QLineEdit(self), QCheckBox(self), QCalendarWidget(self)]
+        self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota')]
+        self.qInteractiveComps = [QLineEdit(self), QLineEdit(self), QLineEdit(self), QCalendarWidget(self)]
 
         # setup of the interactive elements in the widget:
 
@@ -38,7 +38,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         with open('styleSHEETS/callendar-stylesheet.qss', 'r') as file:
             self.qInteractiveComps[-1].setStyleSheet(file.read())
         # setup inner of the layout
-        for i in range(4):
+        for i in range(3):
             self.innerLayout.addWidget(self.qLabels[i], i, 0)  
             self.innerLayout.addWidget(self.qInteractiveComps[i], i, 1)
         self.innerLayout.setContentsMargins(5, 5, 5, 5)
@@ -62,8 +62,6 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
                     data.append(self.qInteractiveComps[i].text())
                 case QCalendarWidget():
                     data.append(self.qInteractiveComps[i].selectedDate())
-                case QCheckBox():
-                    data.append(self.qInteractiveComps[i].isChecked())
         # checking if the data was properly written
         if data[0] != '' and data[1] != '' and data[2] != '':
             data[2] = data[2].replace(',', '.')
@@ -95,7 +93,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
                     exec(objectExec)
                 self.cursor.execute(command)
                 selectedData[sqlIndex] = self.cursor.fetchall()[0][0]
-            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], selectedData['isIncome'], selectedData['idOfOther']))
+            self.create_new_transaction(transaction(selectedData['date'], selectedData['money'], selectedData['idCategory'], selectedData['idOfOther']))
             self.refresh()
 
     def setCompleters(self) -> None:
@@ -112,10 +110,8 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
             self.completers[i].setCaseSensitivity(False)
             self.qInteractiveComps[i].setCompleter(self.completers[i])
             self.qInteractiveComps[i].clear()
-        self.qInteractiveComps[-3].clear()
-        self.qInteractiveComps[-2].setChecked(False)
-
-
+        self.qInteractiveComps[-2].clear()
+        
     def refresh(self):
         self.setCompleters()
         self.update()
