@@ -232,23 +232,3 @@ class QFTLFilter(QWidget):
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
-class QOrderButton(QPushButton):
-    # a class that will be used for ordering purposses of only one thing
-    def __init__(self, name: str) -> None:
-        super().__init__()
-        self.setFlat(True)
-        self.setText(name)
-        self.clicked.connect(self.changeMode)
-    
-    def changeMode(self):
-        print('test')
-
-class QOrderBoard(QWidget):
-    # a class for ordering all the data - board of order buttons
-    def __init__(self) -> None:
-        super().__init__()
-        self.mainLayout = QHBoxLayout()
-        self.buttons = [QOrderButton(text) for text in ['Nazwa', 'Kategoria', 'Kwota', 'Data']]
-        for but in self.buttons:
-            self.mainLayout.addWidget(but)
-        self.setLayout(self.mainLayout)

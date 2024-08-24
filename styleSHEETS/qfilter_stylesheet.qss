@@ -34,16 +34,19 @@ QDateEdit::up-arrow {
 
 #applyButton {
     border: None;
-}
-
-#applyButton QPushButton{
     color: #ffffff;
     background-color: #0000ff;
 }
 
+#resetButton {
+    border: None;
+    color: #ffffff;
+    background-color: #ff0000;
+}
+
 #range {
     font-size: 10px;
-    color: #d3d3d3; /* Biały kolor tekstu */
+    color: #d3d3d3; 
     padding: 0px;
     margin: 0px;
 }

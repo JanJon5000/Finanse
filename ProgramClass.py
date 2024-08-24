@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter
-from pprint import pprint
+from QOrderingClasses import QOrderBoard
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -13,7 +13,7 @@ class CORE(SQL_SINGLE_INSTANCE):
         self.filters = dict()
         self.shownContent = list()
         
-    def show_table(self, filters: dict, orderFilters: list,  limit: int) -> None:
+    def show_table(self, filters: dict, orderFilters: str,  limit: int) -> None:
         command = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         self.filters = filters
         self.orderFilters = orderFilters
@@ -26,20 +26,12 @@ class CORE(SQL_SINGLE_INSTANCE):
                 command += self.filters[key]
                 if list(self.filters.keys()).index(key) != len(list(self.filters.keys()))-1:
                     command += " AND "
+                    
+        command += f" ORDER BY {self.orderFilters} "
 
-        if orderFilters == []:
-            pass
-        else:
-            command += " ORDER BY "
-            for element in self.orderFilters:
-                command += f" {element[0]}"
-                if element[1] == 1: command += ' ASC '
-                else: command += " DESC "
-        command += f" LIMIT {limit};"
-        print(command)
+        # print(command)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
-        print(self.shownContent)
     def show_graph() -> None: 
         pass
 
@@ -59,7 +51,9 @@ class Program(CORE, QWidget):
         self.settings["height"] = placeholder[0]
         self.settings["width"] = placeholder[1]
         self.settings["rowNumber"] = placeholder[2]
-        self.orderFilters = []
+        self.orderFilters = 'transactions.date DESC'
+
+        self.orderContent = None
         self.filterContents = dict()
         #setting the layout to grid
         self.mainGrid = QGridLayout()
@@ -71,6 +65,7 @@ class Program(CORE, QWidget):
     #function cleaning the grid
     def clear_layout(self, layout):
         self.filterContents = dict()
+
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
@@ -93,6 +88,8 @@ class Program(CORE, QWidget):
                     elif isinstance(child.widget(), QListFilter):
                         lst = [item.text() for item in child.widget().qListPart.selectedItems()]
                         self.filterContents[child.widget().objectName()] = lst
+                    elif isinstance(child.widget(), QOrderBoard):
+                        self.orderContent = child.widget().currentFilter
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
 
@@ -104,8 +101,6 @@ class Program(CORE, QWidget):
         self.consolidatedFilterWidget.setMaximumWidth(300)
         self.consolidatedFilterWidget.setObjectName('filterStatus')
         self.filterLayout = QVBoxLayout()
-
-        # print(self.filterContents)
 
         # widget responsible for determining which 'date range' is supposed to be shown
         self.cursor.execute("SELECT date from transactions WHERE 1=1")
@@ -157,22 +152,21 @@ class Program(CORE, QWidget):
         self.peopleFilter.setObjectName('people.PersonName')
         self.filterLayout.addWidget(self.peopleFilter)
 
-        # QlineEdit setting the number of records to be displayed
-        self.recordFilter = QLineEdit(self)
-        self.recordFilter.setMaxLength(2)
-        self.recordFilter.textChanged.connect(self.change_record_num)
-        self.filterLayout.addWidget(self.recordFilter)
-
-        # button applying filters
-        self.applyLabel = QLabel('')
+        # buttons applying filters and reseting filters
         self.applyButton = QPushButton("zastosuj")
         self.applyButton.clicked.connect(self.refresh)
+        self.applyButton.setObjectName('applyButton')
+
+        self.resetButton = QPushButton("przywróć")
+        self.resetButton.clicked.connect(self.reset)
+        self.resetButton.setObjectName('resetButton')
+
+        # a layout for these buttons
         self.applywWidget = QWidget()
         self.applyLayout = QHBoxLayout()
-        self.applyLayout.addWidget(self.applyLabel)
+        self.applyLayout.addWidget(self.resetButton)
         self.applyLayout.addWidget(self.applyButton)
         self.applywWidget.setLayout(self.applyLayout)
-        self.applywWidget.setObjectName('applyButton')
         self.filterLayout.addWidget(self.applywWidget)
 
         self.consolidatedFilterWidget.setLayout(self.filterLayout)
@@ -189,6 +183,11 @@ class Program(CORE, QWidget):
         # PLACEHOLDER  a button tht generates and displays diagram out of displayed data
         self.diagramButton = QLabel('PLACEHOLDER')
         self.mainGrid.addWidget(self.diagramButton, 0, 2)
+
+        # an ordering widget 
+        self.orderWidget = QOrderBoard(self.orderFilters)
+        # self.orderWidget.changedFilter.connect(self.refresh)
+        self.mainGrid.addWidget(self.orderWidget, 1, 1, 1, 2)
 
         # seperate widget with seperate layout of the data, after ordering after filters
         dataWidget = QWidget()
@@ -216,13 +215,14 @@ class Program(CORE, QWidget):
                 dataLayout.addWidget(placeholder, counter, i)
             counter += 1
         dataWidget.setLayout(dataLayout)
-        self.mainGrid.addWidget(dataWidget, 1, 1, 4, 2)
+        self.mainGrid.addWidget(dataWidget, 2, 1, 4, 2)
 
         self.setLayout(self.mainGrid)
 
     def refresh(self) -> None:
         self.clear_layout(self.mainGrid)
         self.filters = dict()
+        self.orderFilters = self.orderContent
         for key in list(self.filterContents.keys()):
             if len(self.filterContents[key]) != 0:
                 if (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 0:
@@ -259,16 +259,14 @@ class Program(CORE, QWidget):
         self.populate_grid()
         self.update()
 
-    def change_record_num(self, text) -> None:
-        text = self.recordFilter.text()
-        try:
-            text = int(text)
-            self.settings['rowNumber'] = text
-            self.cursor.execute("DELETE FROM settings WHERE 1=1")
-            self.cursor.execute("INSERT INTO settings VALUES (?, ?, ?)", (self.settings['height'], self.settings['width'], text))
-            self.connection.commit()
-        except:
-            pass
+    def reset(self):
+        self.clear_layout(self.mainGrid)
+        self.filters = dict()
+        self.filterContents = dict()
+        self.orderFilters = 'transactions.date DESC'
+        self.orderContent = 'transactions.date DESC'
+        self.populate_grid()
+        self.update()
 
     def closeEvent(self, event):
         new_size = self.size()

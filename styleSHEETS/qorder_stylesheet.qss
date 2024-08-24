@@ -1,39 +1,30 @@
-QCheckBox {
-    color: #ffff00;
-    padding: 5px;
+* {
+    padding: None;
+    background-color: white;
+    border: 3px white;
 }
-QCheckBox::indicator {
-    width: 15px;
-    height: 15px;
-    border: 1px solid #ffff00;
-    background-color: #000000;
+
+QWidget {
+    background-color: white;
 }
-QCheckBox::indicator:checked {
-    background-color: #ffff00;
+
+QPushButton {
+    background-color: white;
+    color: black;
+    border: 3px black;
+    font-size: 14px;
 }
-QListWidget {
-    background-color: #000000;
-    color: #ffffff;
-    border: 2px solid #ffff00;
+
+QPushButton:focus {
+    outline: none;
 }
-QListWidget::item {
-    background-color: #000000;
-    color: #ffffff;
+
+QPushButton:first-child {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
-QListWidget::item:selected {
-    background-color: #ffff00;
-    color: #000000;
-}
-QListWidget:disabled {
-    background-color: #444444;
-    color: #888888;
-    border: 2px solid #666666;
-}
-QListWidget::item:disabled {
-    background-color: #444444;
-    color: #888888;
-}
-QListWidget::item:selected:disabled {
-    background-color: #666666;
-    color: #aaaaaa;
+
+QPushButton:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
