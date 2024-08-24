@@ -26,7 +26,7 @@ class CORE(SQL_SINGLE_INSTANCE):
                 command += self.filters[key]
                 if list(self.filters.keys()).index(key) != len(list(self.filters.keys()))-1:
                     command += " AND "
-                    
+
         command += f" ORDER BY {self.orderFilters} "
 
         # print(command)
@@ -186,6 +186,7 @@ class Program(CORE, QWidget):
 
         # an ordering widget 
         self.orderWidget = QOrderBoard(self.orderFilters)
+        self.orderWidget.changedFilter.connect(self.refresh)
         # self.orderWidget.changedFilter.connect(self.refresh)
         self.mainGrid.addWidget(self.orderWidget, 1, 1, 1, 2)
 
