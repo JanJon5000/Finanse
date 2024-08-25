@@ -1,7 +1,7 @@
 import sqlite3 as sql
 from datetime import date
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint, QDate
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout, QDateEdit
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout, QDateEdit, QScrollArea
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter
@@ -23,13 +23,15 @@ class CORE(SQL_SINGLE_INSTANCE):
         else:
             command += " WHERE "
             for key in list(self.filters.keys()):
+                command += '('
                 command += self.filters[key]
+                command += ')'
                 if list(self.filters.keys()).index(key) != len(list(self.filters.keys()))-1:
                     command += " AND "
 
         command += f" ORDER BY {self.orderFilters} "
 
-        # print(command)
+        print(command)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
     def show_graph() -> None: 
@@ -187,10 +189,14 @@ class Program(CORE, QWidget):
         # an ordering widget 
         self.orderWidget = QOrderBoard(self.orderFilters)
         self.orderWidget.changedFilter.connect(self.refresh)
-        # self.orderWidget.changedFilter.connect(self.refresh)
-        self.mainGrid.addWidget(self.orderWidget, 1, 1, 1, 2)
+        self.mainGrid.addWidget(self.orderWidget, 1, 1, 1, 4)
+
+        # PLACEHOLDER widget for the stats of the user
+        self.statWidget = QLabel('PLACEHOLDER')
+        self.mainGrid.addWidget(self.statWidget, 0, 5, 2, 1)
 
         # seperate widget with seperate layout of the data, after ordering after filters
+        scrollableDataWidget = QScrollArea()
         dataWidget = QWidget()
         dataLayout = QGridLayout()
         counter = 0
@@ -216,7 +222,9 @@ class Program(CORE, QWidget):
                 dataLayout.addWidget(placeholder, counter, i)
             counter += 1
         dataWidget.setLayout(dataLayout)
-        self.mainGrid.addWidget(dataWidget, 2, 1, 4, 2)
+        scrollableDataWidget.setWidgetResizable(True)
+        scrollableDataWidget.setWidget(dataWidget)
+        self.mainGrid.addWidget(scrollableDataWidget, 2, 1, 5, 5)
 
         self.setLayout(self.mainGrid)
 
