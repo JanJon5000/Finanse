@@ -29,7 +29,7 @@ class CORE(SQL_SINGLE_INSTANCE):
                 if list(self.filters.keys()).index(key) != len(list(self.filters.keys()))-1:
                     command += " AND "
 
-        command += f" ORDER BY {self.orderFilters} "
+        command += f" ORDER BY {self.orderFilters[:-4]} COLLATE NOCASE {self.orderFilters[-4:]} "
 
         print(command)
         self.cursor.execute(command)
