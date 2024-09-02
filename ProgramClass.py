@@ -1,5 +1,5 @@
 import sqlite3 as sql
-from datetime import date
+from datetime import date, datetime
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint, QDate
 from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout, QDateEdit, QScrollArea
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
@@ -247,10 +247,11 @@ class Program(CORE, QWidget):
                         except:
                             self.filters[key] += f" AND {float(self.sumFilter.currentFilter[self.sumFilter.flag].maxValue)} "
                 elif (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 1 and len(self.filterContents[key][1]) != 0:
-                    if isinstance(self.filterContents[key][1][0], QDate):
+                    if isinstance(self.filterContents[key][1][0], QDate) or len(self.filterContents[key][1][0].split('-')) > 1:
                         self.filters[key] = ''
                         for val in self.filterContents[key][1]:
-                            self.filters[key] += f" {key} = '{val.toPyDate().strftime('%Y-%m-%d')}' "
+                            valDate = datetime.strptime(val, "%Y-%m-%d")
+                            self.filters[key] += f" {key} = '{valDate.strftime('%Y-%m-%d')}' "
                             if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
                                 self.filters[key] += " OR "
                     elif isinstance(self.filterContents[key][1][0], str):
