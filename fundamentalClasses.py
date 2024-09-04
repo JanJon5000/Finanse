@@ -48,3 +48,8 @@ class SQL_SINGLE_INSTANCE:
     def create_new_transaction(self, transaction: transaction) -> None:
         self.cursor.execute(f"INSERT INTO transactions VALUES (?, ?, ?, ?)", (transaction.idCategory, transaction.idOfOther, transaction.date, transaction.money))
         self.connection.commit()
+
+class SQL_DATA_HANDLE:
+    def __init__(self) -> None:
+        self.connection = sql.connect("FINANCE_DB.db")
+        self.cursor = self.connection.cursor()

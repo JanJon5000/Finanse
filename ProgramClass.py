@@ -6,6 +6,7 @@ from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, categor
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter
 from QOrderingClasses import QOrderBoard
+from QDataWidgetClass import QDataWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -198,7 +199,7 @@ class Program(CORE, QWidget):
         # seperate widget with seperate layout of the data, after ordering after filters
         scrollableDataWidget = QScrollArea()
         dataWidget = QWidget()
-        dataLayout = QGridLayout()
+        dataLayout = QVBoxLayout()
         counter = 0
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         # printing all the categories in their colors
@@ -206,21 +207,12 @@ class Program(CORE, QWidget):
         colors = self.cursor.fetchall()
         colors = {tpl[0]:[int(i) for i in tpl[1].split(',')] for tpl in colors}
         # setting the colors of 'money' value depending on its 'isIncome' property
-        for record in self.shownContent:
-            for i in range(len(record)):
-                if i != 4:
-                    placeholder = QLabel(str(record[i]))
-                else: continue
-                if i == 1:
-                    placeholder.setStyleSheet(f"color: rgb({colors[record[i]][0]}, {colors[record[i]][1]}, {colors[record[i]][2]});")
-                if i == 2:
-                    if record[-2] == abs(record[-2]):
-                        placeholder.setStyleSheet("color: rgb(0, 255, 0);")
-                    else:
-                        placeholder = QLabel('-' + str(record[2]), self)
-                        placeholder.setStyleSheet("color: rgb(255, 0, 0)")
-                dataLayout.addWidget(placeholder, counter, i)
-            counter += 1
+        with open('styleSHEETS/data_stylesheet.qss', 'r') as file:
+            style = file.read()
+            for record in self.shownContent:
+                placeholder = QDataWidget(record, colors[record[1]])
+                placeholder.setStyleSheet(style)
+                dataLayout.addWidget(placeholder)
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)
         scrollableDataWidget.setWidget(dataWidget)
