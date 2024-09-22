@@ -44,9 +44,17 @@ QDateEdit::up-arrow {
     background-color: #ff0000;
 }
 
+#edit {
+    font-size: 20px;
+}
+
 #range {
-    font-size: 10px;
+    font-size: 15px;
     color: #d3d3d3; 
     padding: 0px;
     margin: 0px;
+}
+
+* {
+    font-size: 20px
 }

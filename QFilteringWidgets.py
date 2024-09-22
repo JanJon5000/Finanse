@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QSizePolicy, QVBoxLayout, QDateEdit, QLabel, QPushButton, QHBoxLayout
 from PyQt5.QtCore import QDate, Qt, pyqtSignal  
 from PyQt5.QtGui import QFocusEvent, QMouseEvent, QPen, QPainter, QColor, QDoubleValidator
 from datetime import date
-    
+
 class QListFilter(QWidget):
     def __init__(self, qListValues) -> None:
         # initializer of the parent class
@@ -13,6 +13,7 @@ class QListFilter(QWidget):
         self.qScrollPart.setWidgetResizable(True)
         self.qListPart = QListWidget()
         self.qListPart.addItems(self.content)
+        self.qListPart.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         # user can select multiple
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
 
@@ -135,6 +136,8 @@ class QFromToFilter(QWidget):
         
         self.labels[0].setObjectName('range')
         self.labels[1].setObjectName('range')
+        self.biggerData.setObjectName('edit')
+        self.smallerData.setObjectName('edit')
         # a layout of the widget
         self.accesibleLayout = QGridLayout()
         self.accesibleLayout.addWidget(self.labels[0], 0, 0)

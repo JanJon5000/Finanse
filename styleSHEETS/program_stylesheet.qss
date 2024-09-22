@@ -107,5 +107,5 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
 
 * {
     font-family: "Courier New", Courier, monospace;
-    font-size: 14pt;
+    font-size: 20px;
 }

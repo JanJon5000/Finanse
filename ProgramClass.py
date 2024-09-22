@@ -101,7 +101,7 @@ class Program(CORE, QWidget):
         # That column is its own widget since it has to have its own setting as a group
         # widget responsible for how the data is ordered
         self.consolidatedFilterWidget = QWidget()
-        self.consolidatedFilterWidget.setMaximumWidth(300)
+        self.consolidatedFilterWidget.setMaximumWidth(350)
         self.consolidatedFilterWidget.setObjectName('filterStatus')
         self.filterLayout = QVBoxLayout()
 
