@@ -1,5 +1,6 @@
 from fundamentalClasses import SQL_DATA_HANDLE
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton, QLineEdit, QDateEdit
+from PyQt5.QtCore import QDate
 
 class QDataWidget(QWidget):
     def __init__(self, variables: list, colors: list) -> None:
@@ -54,6 +55,12 @@ class QDataWidget(QWidget):
                             pass
                         else:
                             x = QLineEdit('-' + x.text())
+                try:
+                    if self.variables.index(x.text()) == 3:
+                        print((int(x.text()[:4]), int(x.text()[5:7]), int(x.text()[8:])))
+                        x = QDateEdit(QDate(int(x.text()[:4]), int(x.text()[5:7]), int(x.text()[8:])))
+                        x.setDisplayFormat("yyyy-MM-dd")
+                except ValueError: pass
                 self.readLayout.addWidget(x)
             x = QPushButton("Zapisz zmiany")
             x.clicked.connect(self.changeLayout)
@@ -66,12 +73,19 @@ class QDataWidget(QWidget):
         self.update()
 
     def clear_layout(self, layout):
+        self.prevVariables = []
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
                 if child.widget() is not None:
                     if not isinstance(child.widget(), QPushButton):
-                        print(child.widget().text())
+                        try:
+                            self.prevVariables.append(float(child.widget().text()))
+                        except ValueError:
+                            self.prevVariables.append(child.widget().text())
+                        except:
+                            self.prevVariables.append(child.widget().date())
+                        print(self.variables, self.prevVariables)
                     child.widget().deleteLater()
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
