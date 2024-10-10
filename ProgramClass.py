@@ -7,6 +7,7 @@ from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter
 from QOrderingClasses import QOrderBoard
 from QDataWidgetClass import QDataWidget
+from QInfoWidget import QInfoWidget
 
 class CORE(SQL_SINGLE_INSTANCE):
     def __init__(self):
@@ -192,8 +193,8 @@ class Program(CORE, QWidget):
         self.orderWidget.changedFilter.connect(self.refresh)
         self.mainGrid.addWidget(self.orderWidget, 1, 1, 1, 4)
 
-        # PLACEHOLDER widget for the stats of the user
-        self.statWidget = QLabel('PLACEHOLDER')
+        # widget for the stats of the user
+        self.statWidget = QInfoWidget(self.shownContent)
         self.mainGrid.addWidget(self.statWidget, 0, 5, 2, 1)
 
         # seperate widget with seperate layout of the data, after ordering after filters

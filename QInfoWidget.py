@@ -1,31 +1,26 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout
 
 class QInfoWidget(QWidget):
-    def __init__(self) -> None:
+    def __init__(self, data) -> None:
         super().__init__()
-        self.accessibleLayout = QVBoxLayout()
+        self.accessibleLayout = QGridLayout()
+        self.data = data
         self.populateLayout()
 
     def populateLayout(self):
-        self.balanceWidget = QLabel()
-        self.balanceWidget.setObjectName("balance")
+        self.balanceWidget = QLabel("test")
+        self.accessibleLayout.addWidget(self.balanceWidget, 0, 0)
+        self.infoTexts = [QLabel("srednie zyski/straty:"), QLabel("maks zyski/straty:")]
+        self.incomeWidgets = [QLabel("test0"), QLabel("test")]
+        self.spendigsWidgets = [QLabel("test0"), QLabel("test")]
+        columnCounter = 0
+        for l in [self.infoTexts, self.incomeWidgets, self.spendigsWidgets]:
+            for w in l:
+                self.accessibleLayout.addWidget(w, l.index(w)+1, columnCounter)
+            columnCounter += 1
         
-        self.spendigsWidget = QLabel()
-        self.spendigsWidget.setObjectName("spendings")
-        
-        self.incomeWidget = QLabel()
-        self.incomeWidget.setObjectName("income")
-
-        self.periodOfTimeWidget = QLabel()
-        self.periodOfTimeWidget.setObjectName("time")
-
-        self.avarageSpending = QLabel()
-        self.avarageIncome = QLabel()
-        self.maxSpending = QLabel()
-        self.minSPending = QLabel()
-        self.maxIncome = QLabel()
-        self.minIncome = QLabel()
+        self.setLayout(self.accessibleLayout)
 
     def refresh(self):
         pass
