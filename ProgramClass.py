@@ -203,6 +203,8 @@ class Program(CORE, QWidget):
         dataLayout = QVBoxLayout()
         counter = 0
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
+        #updateing data which the info widget will be working with
+        self.statWidget.updateData(self.shownContent)
         # printing all the categories in their colors
         self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
         colors = self.cursor.fetchall()

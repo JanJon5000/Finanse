@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout
 
+
 class QInfoWidget(QWidget):
     def __init__(self, data) -> None:
         super().__init__()
@@ -19,7 +20,6 @@ class QInfoWidget(QWidget):
             for w in l:
                 self.accessibleLayout.addWidget(w, l.index(w)+1, columnCounter)
             columnCounter += 1
-        
         self.setLayout(self.accessibleLayout)
 
     def refresh(self):
@@ -33,3 +33,11 @@ class QInfoWidget(QWidget):
                     child.widget().deleteLater()
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
+    
+    def updateData(self, data):
+        self.data = data
+        self.balanceWidget.setText(str(sum([tpl[2] for tpl in self.data])))
+        self.incomeWidgets[0].setText(str(sum([tpl[2] for tpl in self.data if tpl[2] >= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0])))
+        self.spendigsWidgets[0].setText(str(sum([tpl[2] for tpl in self.data if tpl[2] <= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0])))
+        self.incomeWidgets[1].setText(str(max([tpl[2] for tpl in self.data if tpl[2] >= 0])))
+        self.spendigsWidgets[1].setText(str(min([tpl[2] for tpl in self.data if tpl[2] <= 0])))
