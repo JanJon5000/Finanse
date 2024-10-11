@@ -215,7 +215,7 @@ class Program(CORE, QWidget):
             for record in self.shownContent:
                 placeholder = QDataWidget(record, colors[record[1]])
                 placeholder.setStyleSheet(style)
-                placeholder.dataChanged.connect(self.refresh)
+                #placeholder.dataChanged.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)

@@ -27,8 +27,8 @@ class QInfoWidget(QWidget):
     def updateData(self, data):
         self.data = data
         for comm in [["self.balanceWidget.setText(str(sum([tpl[2] for tpl in self.data])))", "self.balanceWidget.setText('0')"],
-                     ["self.dataWidgets['incomeWidgets'][0].setText(str(sum([tpl[2] for tpl in self.data if tpl[2] >= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0])))", "self.dataWidgets['incomeWidgets'][0].setText('0')"],
-                     ["self.dataWidgets['spendingsWidgets'][0].setText(str(sum([tpl[2] for tpl in self.data if tpl[2] <= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0])))", "self.self.dataWidgets['spendingsWidgets'][0].setText('0')"],
+                     ["self.dataWidgets['incomeWidgets'][0].setText(f'{round(sum([tpl[2] for tpl in self.data if tpl[2] >= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0]), 2)}')", "self.dataWidgets['incomeWidgets'][0].setText('0')"],
+                     ["self.dataWidgets['spendingsWidgets'][0].setText(f'{round(sum([tpl[2] for tpl in self.data if tpl[2] <= 0])/len([tpl[2] for tpl in self.data if tpl[2] <= 0]), 2)}')", "self.self.dataWidgets['spendingsWidgets'][0].setText('0')"],
                      ["self.dataWidgets['incomeWidgets'][1].setText(f'{max([tpl[2] for tpl in self.data if tpl[2] >= 0])} / {min([tpl[2] for tpl in self.data if tpl[2] >= 0])}')", "self.dataWidgets['incomeWidgets'][1].setText('0/0')"],
                      ["self.dataWidgets['spendingsWidgets'][1].setText(f'{max([tpl[2] for tpl in self.data if tpl[2] <= 0])} / {min([tpl[2] for tpl in self.data if tpl[2] <= 0])}')", "self.dataWidgets['spendingsWidgets'][1].setText('0/0')"]
                      ]:
