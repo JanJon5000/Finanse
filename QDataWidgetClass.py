@@ -5,6 +5,7 @@ from PyQt5.QtGui import QDoubleValidator
 from random import randint
 
 class QDataWidget(QWidget):
+    dataChanged = pyqtSignal()
     def __init__(self, variables: list, colors: list) -> None:
         super().__init__()
         self.readLayout = QHBoxLayout()
@@ -65,6 +66,7 @@ class QDataWidget(QWidget):
                 self.readLayout.addWidget(x)
             x = QPushButton("Zapisz zmiany")
             x.clicked.connect(self.changeLayout)
+            x.clicked.connect(self.dataChanged.emit)
             self.readLayout.addWidget(x)
 
     def changeLayout(self):
@@ -107,7 +109,6 @@ class QDataWidget(QWidget):
         HANDLE.cursor.execute(f"DELETE FROM transactions WHERE idCategory = '{deleteRecordData[1]}' AND idOfOther = '{deleteRecordData[0]}' AND date = '{self.variables[-1]}' AND money = {self.variables[2]}")
         HANDLE.create_new_transaction(transaction(self.prevVariables[-1], self.prevVariables[2], newRecordData[1], newRecordData[0]))
         self.variables = self.prevVariables
-        pass
 
     def clear_layout(self, layout):
         self.prevVariables = []

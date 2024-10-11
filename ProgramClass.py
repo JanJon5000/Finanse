@@ -196,7 +196,7 @@ class Program(CORE, QWidget):
         # widget for the stats of the user
         self.statWidget = QInfoWidget(self.shownContent)
         self.mainGrid.addWidget(self.statWidget, 0, 5, 2, 1)
-
+        
         # seperate widget with seperate layout of the data, after ordering after filters
         scrollableDataWidget = QScrollArea()
         dataWidget = QWidget()
@@ -215,6 +215,7 @@ class Program(CORE, QWidget):
             for record in self.shownContent:
                 placeholder = QDataWidget(record, colors[record[1]])
                 placeholder.setStyleSheet(style)
+                placeholder.dataChanged.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)
