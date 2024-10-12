@@ -25,10 +25,11 @@ class CORE(SQL_SINGLE_INSTANCE):
         else:
             command += " WHERE "
             for key in list(self.filters.keys()):
-                command += '('
-                command += self.filters[key]
-                command += ')'
-                if list(self.filters.keys()).index(key) != len(list(self.filters.keys()))-1:
+                if self.filters[key] != '':
+                    command += '('
+                    command += self.filters[key]
+                    command += ')'
+                if list(self.filters.keys()).index(key) > len(list(self.filters.keys()))-1:
                     command += " AND "
 
         command += f" ORDER BY {self.orderFilters[:-4]} COLLATE NOCASE {self.orderFilters[-4:]} "
@@ -89,6 +90,7 @@ class Program(CORE, QWidget):
                             elif isinstance(dataWidg.smallerData, QDateEdit):
                                 lst.append([dataWidg.smallerData.date(), dataWidg.biggerData.date()])
                         self.filterContents[child.widget().objectName()] = lst
+                        print(self.filterContents[child.widget().objectName()])
                     elif isinstance(child.widget(), QListFilter):
                         lst = [item.text() for item in child.widget().qListPart.selectedItems()]
                         self.filterContents[child.widget().objectName()] = lst
@@ -215,7 +217,7 @@ class Program(CORE, QWidget):
             for record in self.shownContent:
                 placeholder = QDataWidget(record, colors[record[1]])
                 placeholder.setStyleSheet(style)
-                #placeholder.dataChanged.connect(self.refresh)
+                placeholder.dataChanged.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)
@@ -232,16 +234,28 @@ class Program(CORE, QWidget):
             if len(self.filterContents[key]) != 0:
                 if (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 0:
                     if isinstance(self.filterContents[key][1][0], QDate):
-                        self.filters[key] = f" {key} BETWEEN '{self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d')}' AND '{self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d')}' "
+                        self.cursor.execute('SELECT date FROM transactions WHERE 1=1')
+                        dates = self.cursor.fetchall()
+                        dates = [max(dates), min(dates)]
+                        self.filters[key] = ''
+                        if self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d') != dates[1]:
+                            self.filters[key] += f" {key} >= '{self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d')}' "
+                        if self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d') != dates[0]:
+                            if self.filters[key] != '':
+                                self.filters[key] += " AND "
+                            self.filters[key] += f" {key} <= '{self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d')}' "
                     elif isinstance(self.filterContents[key][1][0], str):
-                        try:
-                            self.filters[key] = f" {key} BETWEEN {float(self.filterContents[key][1][0])} "
+                        self.filters[key] = ''
+                        try: 
+                            self.filters[key] += f" {key} >= {float(self.filterContents[key][1][0])} "
                         except:
-                            self.filters[key] = f" {key} BETWEEN {float(self.sumFilter.currentFilter[self.sumFilter.flag].minValue)} "
+                            pass
                         try:
-                            self.filters[key] += f" AND {float(self.filterContents[key][1][1])} "
+                            if self.filters[key] != '': 
+                                self.filters[key] += ' AND '
+                            self.filters[key] += f" {key} <= {float(self.filterContents[key][1][0])} "
                         except:
-                            self.filters[key] += f" AND {float(self.sumFilter.currentFilter[self.sumFilter.flag].maxValue)} "
+                            pass
                 elif (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 1 and len(self.filterContents[key][1]) != 0:
                     if isinstance(self.filterContents[key][1][0], QDate) or len(self.filterContents[key][1][0].split('-')) > 1:
                         self.filters[key] = ''

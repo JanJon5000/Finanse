@@ -77,6 +77,7 @@ class QFromToFilter(QWidget):
         # its layout
         self.accesibleLayout = QGridLayout()
         self.negativeAlertFlag = False
+        self.maxMinRange = True
 
         # two cases - date and a number (only those things in my program require that filter to exist)
         if isinstance(max, float) and isinstance(min, float):
