@@ -75,6 +75,7 @@ class QFromToFilter(QWidget):
         # a filter that can filer data in a range - if the user wants data from X value to Y value, they will use this
         super().__init__()
         # its layout
+        
         self.accesibleLayout = QGridLayout()
         self.negativeAlertFlag = False
         self.maxMinRange = True
@@ -108,6 +109,7 @@ class QFromToFilter(QWidget):
             
         # date case
         if isinstance(min, date) and isinstance(max, date):
+            self.doesShowFullRange = True
             # flag variable for later
             self.flag = date(2000, 2, 2)
             self.labels = [QLabel(str(min)), QLabel(str(max))]
@@ -165,6 +167,7 @@ class QFromToFilter(QWidget):
                 elif self.smallerData.text() == '' and self.biggerData.text() == '':
                     smaller_value = self.minValue
                     bigger_value = self.maxValue
+
                 if smaller_value >= 0 and bigger_value >= 0:
                     # both inputs are positive
                     start_ratio = (smaller_value - self.minValue) / self.ratioDivider
@@ -178,14 +181,20 @@ class QFromToFilter(QWidget):
                     start_ratio = (smaller_value - self.minValue) / self.ratioDivider
                     end_ratio = (bigger_value - self.minValue) / self.ratioDivider
                 
+
             elif self.flag == date(2000, 2, 2):
                 start_ratio = float(self.smallerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
                 end_ratio = float(self.biggerData.date().toPyDate().toordinal()-self.minValue)/self.ratioDivider
+                if start_ratio != 0 or end_ratio != 1:
+                    self.doesShowFullRange = False
+                if start_ratio == 0 and end_ratio == 1:
+                    self.doesShowFullRange = True
             if 0 <= start_ratio <= end_ratio <= 1:
                 self.DataPresentationLevel.set_line_ratios(start_ratio, end_ratio)
         except ValueError:
             pass  # Ignore invalid input
-    
+        
+        
     def select_items(self, values: list) -> None:
         try:
             self.smallerData.setText(values[0])

@@ -19,6 +19,7 @@ class CORE(SQL_SINGLE_INSTANCE):
         command = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         self.filters = filters
         self.orderFilters = orderFilters
+        i = 0
 
         if self.filters == dict():
             pass
@@ -26,12 +27,14 @@ class CORE(SQL_SINGLE_INSTANCE):
             command += " WHERE "
             for key in list(self.filters.keys()):
                 if self.filters[key] != '':
+                    i += 1
                     command += '('
                     command += self.filters[key]
                     command += ')'
                 if list(self.filters.keys()).index(key) > len(list(self.filters.keys()))-1:
                     command += " AND "
-
+        if i == 0:
+             command  = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         command += f" ORDER BY {self.orderFilters[:-4]} COLLATE NOCASE {self.orderFilters[-4:]} "
 
         print(command)
@@ -89,8 +92,8 @@ class Program(CORE, QWidget):
                                 lst.append([dataWidg.smallerData.text(), dataWidg.biggerData.text()])
                             elif isinstance(dataWidg.smallerData, QDateEdit):
                                 lst.append([dataWidg.smallerData.date(), dataWidg.biggerData.date()])
+                                lst.append(dataWidg.doesShowFullRange)
                         self.filterContents[child.widget().objectName()] = lst
-                        print(self.filterContents[child.widget().objectName()])
                     elif isinstance(child.widget(), QListFilter):
                         lst = [item.text() for item in child.widget().qListPart.selectedItems()]
                         self.filterContents[child.widget().objectName()] = lst
@@ -116,7 +119,7 @@ class Program(CORE, QWidget):
         dates.sort()
         if dates == []:
             dates.append(date.today())
-        if 'transactions.date' not in list(self.filterContents.keys()):
+        if 'transactions.date' not in list(self.filterContents.keys()) or self.filterContents['transactions.date'][2] == True:
             self.dataFilter = QFTLFilter(max(dates), min(dates), dates, 0)
         else:
             self.dataFilter = QFTLFilter(max(dates), min(dates), dates, self.filterContents['transactions.date'][0])
@@ -203,7 +206,6 @@ class Program(CORE, QWidget):
         scrollableDataWidget = QScrollArea()
         dataWidget = QWidget()
         dataLayout = QVBoxLayout()
-        counter = 0
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         #updateing data which the info widget will be working with
         self.statWidget.updateData(self.shownContent)
@@ -234,16 +236,20 @@ class Program(CORE, QWidget):
             if len(self.filterContents[key]) != 0:
                 if (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 0:
                     if isinstance(self.filterContents[key][1][0], QDate):
+                        
                         self.cursor.execute('SELECT date FROM transactions WHERE 1=1')
                         dates = self.cursor.fetchall()
                         dates = [max(dates), min(dates)]
                         self.filters[key] = ''
+                        if self.filterContents[key][2] == True:
+                            continue
                         if self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d') != dates[1]:
                             self.filters[key] += f" {key} >= '{self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d')}' "
                         if self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d') != dates[0]:
                             if self.filters[key] != '':
                                 self.filters[key] += " AND "
                             self.filters[key] += f" {key} <= '{self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d')}' "
+
                     elif isinstance(self.filterContents[key][1][0], str):
                         self.filters[key] = ''
                         try: 
