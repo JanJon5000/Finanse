@@ -187,20 +187,16 @@ class Program(CORE, QWidget):
         # a button which opens up a dialog window with ability to add new data to db
         self.adderButton = QPushButton('dodaj transakcje', self)
         self.adderButton.clicked.connect(self.showAdderDialog)
-        self.mainGrid.addWidget(self.adderButton, 0, 1)
-
-        # PLACEHOLDER  a button tht generates and displays diagram out of displayed data
-        self.diagramButton = QLabel('PLACEHOLDER')
-        self.mainGrid.addWidget(self.diagramButton, 0, 2)
+        self.mainGrid.addWidget(self.adderButton, 0, 5)
 
         # an ordering widget 
         self.orderWidget = QOrderBoard(self.orderFilters)
         self.orderWidget.changedFilter.connect(self.refresh)
-        self.mainGrid.addWidget(self.orderWidget, 1, 1, 1, 4)
+        self.mainGrid.addWidget(self.orderWidget, 0, 1, 1, 4)
 
         # widget for the stats of the user
         self.statWidget = QInfoWidget(self.shownContent)
-        self.mainGrid.addWidget(self.statWidget, 0, 5, 2, 1)
+        self.mainGrid.addWidget(self.statWidget, 0, 6, 5, 1)
         
         # seperate widget with seperate layout of the data, after ordering after filters
         scrollableDataWidget = QScrollArea()
@@ -224,7 +220,9 @@ class Program(CORE, QWidget):
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)
         scrollableDataWidget.setWidget(dataWidget)
-        self.mainGrid.addWidget(scrollableDataWidget, 2, 1, 5, 5)
+        self.mainGrid.addWidget(scrollableDataWidget, 1, 1, 5, 5)
+        self.mainGrid.setRowStretch(0, 1)
+        self.mainGrid.setRowStretch(1, 5)
 
         self.setLayout(self.mainGrid)
 
