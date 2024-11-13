@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QVBoxLayout, QListWidget, QScrollArea, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QVBoxLayout, QListWidget, QScrollArea, QSizePolicy, QHBoxLayout, QTreeWidget
 from fundamentalClasses import SQL_SINGLE_INSTANCE
 
 class QParticipationWidget(QWidget):
@@ -7,23 +7,18 @@ class QParticipationWidget(QWidget):
         super().__init__()
         self.getData(keyword=keyword, num=num)
         self.accesibleLayout = QVBoxLayout()
-        self.listComponent = QListWidget()
-        self.listComponent.setSelectionMode(QListWidget.NoSelection)
-        
+        self.listComponent = QTreeWidget()
+        self.listComponent.setSelectionMode(QTreeWidget.NoSelection)
+        self.listComponent.setColumnCount(2)
+        self.listComponent.setHeaderHidden(True)
+        self.listComponent.setRootIsDecorated(False)
+
         self.scrollWidget = QScrollArea()
+        self.scrollWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scrollWidget.setWidget(self.listComponent)
         self.accesibleLayout.addWidget(self.scrollWidget)
         self.setLayout(self.accesibleLayout)
-
-    def getData(self, keyword, num):
-        s = SQL_SINGLE_INSTANCE()
-        if keyword == 'personName':
-            s.cursor.execute('SELECT * FROM transactions, people WHERE people.idOfOther = transactions.idOfOther')
-            self.data = s.cursor.fetchall()
-        elif keyword == 'name':
-            s.cursor.execute('SELECT * FROM transactions, categories WHERE categories.idCategory = transactions.idCategory')
-            self.data = s.cursor.fetchall()
-        print(self.data)
 
 class QInfoWidget(QWidget):
     def __init__(self, data) -> None:
@@ -33,13 +28,14 @@ class QInfoWidget(QWidget):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.populateLayout()
 
-    def populateLayout(self):
+    def populateLayout(self) -> None:
         self.balanceWidget = QLabel("test")
         self.dataWidgets = {
             'infoTexts':[QLabel("średnia"), QLabel("max/min"), QLabel('mediana'), QLabel('udzial kategorii'), QLabel('udzial osób')],
             'incomeWidgets':[QLabel("test0"), QLabel("test1"), QLabel("test2"), QParticipationWidget('name', 1), QParticipationWidget('personName', 1)],
             'spendingsWidgets':[QLabel("test0"), QLabel("test1"), QLabel("test2"), QParticipationWidget('name', -1), QParticipationWidget('personName', -1)]
         }
+        self.combineWidgets = [[QWidget(), QHBoxLayout()], [QWidget(), QHBoxLayout()], [QWidget(), QHBoxLayout()], [QWidget(), QGridLayout()], [QWidget(), QGridLayout()]]
         self.accessibleLayout.addWidget(self.balanceWidget, 0, 0, 1, 3)
         columnCounter = 0
         for l in [self.dataWidgets['infoTexts'], self.dataWidgets['incomeWidgets'], self.dataWidgets['spendingsWidgets']]: 
@@ -49,7 +45,7 @@ class QInfoWidget(QWidget):
         self.setWidgetProperties()
         self.setLayout(self.accessibleLayout)
     
-    def updateData(self, data):
+    def updateData(self, data) -> None:
         self.data = data
         for comm in [["self.balanceWidget.setText(str(sum([tpl[2] for tpl in self.data])))", "self.balanceWidget.setText('0')"],
                      ["self.dataWidgets['incomeWidgets'][0].setText(f'{round(sum([tpl[2] for tpl in self.data if tpl[2] >= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0]), 2)}')", "self.dataWidgets['incomeWidgets'][0].setText('0')"],
@@ -63,8 +59,13 @@ class QInfoWidget(QWidget):
                 exec(comm[0])
             except:
                 exec(comm[1])
-        
-    def setWidgetProperties(self):
+    
+    def fillLists(self) -> None:
+        if self.data != []:
+            for widg in [self.dataWidgets['incomeWidgets'][-1], self.dataWidgets['incomeWidgets'][-2], self.dataWidgets['spendingsWidgets'][-1], self.dataWidgets['spendingsWidgets'][-2]]:
+                pass
+
+    def setWidgetProperties(self) -> None:
         for w in self.dataWidgets['incomeWidgets']:
             w.setStyleSheet('color: GREEN;')
             w.setObjectName('infotext')
