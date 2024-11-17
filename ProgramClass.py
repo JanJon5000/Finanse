@@ -195,7 +195,7 @@ class Program(CORE, QWidget):
         self.mainGrid.addWidget(self.orderWidget, 0, 1, 1, 4)
 
         # widget for the stats of the user
-        self.statWidget = QInfoWidget(self.shownContent)
+        self.statWidget = QInfoWidget(self.shownContent, None)
         self.mainGrid.addWidget(self.statWidget, 0, 6, 5, 1)
         
         # seperate widget with seperate layout of the data, after ordering after filters
@@ -204,7 +204,6 @@ class Program(CORE, QWidget):
         dataLayout = QVBoxLayout()
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
         #updateing data which the info widget will be working with
-        self.statWidget.updateData(self.shownContent)
         # printing all the categories in their colors
         self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
         colors = self.cursor.fetchall()

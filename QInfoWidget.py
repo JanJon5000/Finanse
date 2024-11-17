@@ -1,83 +1,62 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QVBoxLayout, QListWidget, QScrollArea, QSizePolicy, QHBoxLayout, QTreeWidget
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QSizePolicy, QHBoxLayout, QButtonGroup, QStackedWidget, QPushButton
 from fundamentalClasses import SQL_SINGLE_INSTANCE
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import numpy as np
 
-class QParticipationWidget(QWidget):
-    def __init__(self, keyword, num) -> None:
+
+class MatplotlibWidget(QWidget):
+    def __init__(self):
         super().__init__()
-        self.getData(keyword=keyword, num=num)
-        self.accesibleLayout = QVBoxLayout()
-        self.listComponent = QTreeWidget()
-        self.listComponent.setSelectionMode(QTreeWidget.NoSelection)
-        self.listComponent.setColumnCount(2)
-        self.listComponent.setHeaderHidden(True)
-        self.listComponent.setRootIsDecorated(False)
+        layout = QVBoxLayout(self)
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        layout.addWidget(self.canvas)
+        self.figure.tight_layout()
+        self.setLayout(layout)
+        self.plot()
 
-        self.scrollWidget = QScrollArea()
-        self.scrollWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollWidget.setWidget(self.listComponent)
-        self.accesibleLayout.addWidget(self.scrollWidget)
-        self.setLayout(self.accesibleLayout)
+    def plot(self):
+        x = np.linspace(0, 10, 100)
+        y = np.sin(x)
+        ax = self.figure.add_subplot(111)
+        ax.plot(x, y)
+        self.canvas.draw()
+
+class NavigationSettingsWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.accessibleLayout = QVBoxLayout()
+        self.bGroup = QButtonGroup()
+        self.buttonWidget = QWidget()
+        self.buttonlayout = QHBoxLayout()
+        self.stackedWidget = QStackedWidget()
+        for i in range(10):
+            button = QPushButton(f'Test {i}')
+            button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(i))
+            self.buttonlayout.addWidget(button)
+            self.bGroup.addButton(button)
+            self.stackedWidget.addWidget(QLabel(f'Test {i}'))
+        
+        self.buttonWidget.setLayout(self.buttonlayout)
+        self.accessibleLayout.addWidget(self.buttonWidget)
+        self.accessibleLayout.addWidget(self.stackedWidget)
+        self.setLayout(self.accessibleLayout)
+
+
 
 class QInfoWidget(QWidget):
-    def __init__(self, data) -> None:
+    def __init__(self, data, currentPlotType) -> None:
         super().__init__()
-        self.accessibleLayout = QGridLayout()
+        self.accessibleLayout = QVBoxLayout()
         self.data = data
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.populateLayout()
-
-    def populateLayout(self) -> None:
-        self.balanceWidget = QLabel("test")
-        self.dataWidgets = {
-            'infoTexts':[QLabel("średnia"), QLabel("max/min"), QLabel('mediana'), QLabel('udzial kategorii'), QLabel('udzial osób')],
-            'incomeWidgets':[QLabel("test0"), QLabel("test1"), QLabel("test2"), QParticipationWidget('name', 1), QParticipationWidget('personName', 1)],
-            'spendingsWidgets':[QLabel("test0"), QLabel("test1"), QLabel("test2"), QParticipationWidget('name', -1), QParticipationWidget('personName', -1)]
-        }
-        self.combineWidgets = [[QWidget(), QHBoxLayout()], [QWidget(), QHBoxLayout()], [QWidget(), QHBoxLayout()], [QWidget(), QGridLayout()], [QWidget(), QGridLayout()]]
-        self.accessibleLayout.addWidget(self.balanceWidget, 0, 0, 1, 3)
-        columnCounter = 0
-        for l in [self.dataWidgets['infoTexts'], self.dataWidgets['incomeWidgets'], self.dataWidgets['spendingsWidgets']]: 
-            for w in l:
-                self.accessibleLayout.addWidget(w, l.index(w)+1, columnCounter)
-            columnCounter += 1
-        self.setWidgetProperties()
+        self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
+        self.accessibleLayout.setSpacing(0)
+        self.plotImage = MatplotlibWidget()
+        self.accessibleLayout.addWidget(self.plotImage)
+        self.accessibleLayout.addWidget(NavigationSettingsWidget())
         self.setLayout(self.accessibleLayout)
-    
-    def updateData(self, data) -> None:
-        self.data = data
-        for comm in [["self.balanceWidget.setText(str(sum([tpl[2] for tpl in self.data])))", "self.balanceWidget.setText('0')"],
-                     ["self.dataWidgets['incomeWidgets'][0].setText(f'{round(sum([tpl[2] for tpl in self.data if tpl[2] >= 0])/len([tpl[2] for tpl in self.data if tpl[2] >= 0]), 2)}')", "self.dataWidgets['incomeWidgets'][0].setText('0')"],
-                     ["self.dataWidgets['spendingsWidgets'][0].setText(f'{round(sum([tpl[2] for tpl in self.data if tpl[2] <= 0])/len([tpl[2] for tpl in self.data if tpl[2] <= 0]), 2)}')", "self.dataWidgets['spendingsWidgets'][0].setText('0')"],
-                     ["self.dataWidgets['incomeWidgets'][1].setText(f'{max([tpl[2] for tpl in self.data if tpl[2] >= 0])} / {min([tpl[2] for tpl in self.data if tpl[2] >= 0])}')", "self.dataWidgets['incomeWidgets'][1].setText('0/0')"],
-                     ["self.dataWidgets['spendingsWidgets'][1].setText(f'{min([tpl[2] for tpl in self.data if tpl[2] <= 0])} / {max([tpl[2] for tpl in self.data if tpl[2] <= 0])}')", "self.dataWidgets['spendingsWidgets'][1].setText('0/0')"],
-                     ['self.dataWidgets["incomeWidgets"][2].setText(f"{sorted([tpl[2] for tpl in self.data if tpl[2] >= 0])[int(len([tpl[2] for tpl in self.data if tpl[2] >= 0])/2)]}")','self.dataWidgets["incomeWidgets"][2].setText("0")'],
-                     ['self.dataWidgets["spendingsWidgets"][2].setText(f"{sorted([tpl[2] for tpl in self.data if tpl[2] <= 0])[int(len([tpl[2] for tpl in self.data if tpl[2] <= 0])/2)]}")','self.dataWidgets["spendingsWidgets"][2].setText("0")']
-                     ]:
-            try:
-                exec(comm[0])
-            except:
-                exec(comm[1])
-    
-    def fillLists(self) -> None:
-        if self.data != []:
-            for widg in [self.dataWidgets['incomeWidgets'][-1], self.dataWidgets['incomeWidgets'][-2], self.dataWidgets['spendingsWidgets'][-1], self.dataWidgets['spendingsWidgets'][-2]]:
-                pass
-
-    def setWidgetProperties(self) -> None:
-        for w in self.dataWidgets['incomeWidgets']:
-            w.setStyleSheet('color: GREEN;')
-            w.setObjectName('infotext')
-            w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        for w in self.dataWidgets['spendingsWidgets']:
-            w.setStyleSheet('color: RED;')
-            w.setObjectName('infotext')
-            w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        for w in self.dataWidgets['infoTexts']:
-            w.setObjectName('infotext')
-            w.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        with open('styleSHEETS/info_stylesheet.qss', 'r') as file:
-            style = file.read()
-            self.setStyleSheet(style)
-        
+       
