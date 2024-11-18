@@ -29,21 +29,54 @@ class NavigationSettingsWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.accessibleLayout = QVBoxLayout()
-        self.bGroup = QButtonGroup()
-        self.buttonWidget = QWidget()
-        self.buttonlayout = QHBoxLayout()
+        self.buttonLayout = QHBoxLayout()
         self.stackedWidget = QStackedWidget()
-        for i in range(10):
-            button = QPushButton(f'Test {i}')
-            button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(i))
-            self.buttonlayout.addWidget(button)
-            self.bGroup.addButton(button)
-            self.stackedWidget.addWidget(QLabel(f'Test {i}'))
+
+        self.createView1()
+        self.createView2()
+        self.createView3()
+
         
-        self.buttonWidget.setLayout(self.buttonlayout)
-        self.accessibleLayout.addWidget(self.buttonWidget)
+        button = QPushButton(f'test 1', self)
+        button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
+        self.buttonLayout.addWidget(button)
+
+        button2 = QPushButton(f'test 2', self)
+        button2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
+        self.buttonLayout.addWidget(button2)
+
+        button3 = QPushButton(f'test 3', self)
+        button3.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(2))
+        self.buttonLayout.addWidget(button3)
+
+        self.accessibleLayout.addLayout(self.buttonLayout)
         self.accessibleLayout.addWidget(self.stackedWidget)
+
         self.setLayout(self.accessibleLayout)
+
+    def createView1(self):
+        view = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('Test 1', self))
+        view.setLayout(layout)
+
+        self.stackedWidget.addWidget(view)
+
+    def createView2(self):
+        view = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('Test 2', self))
+        view.setLayout(layout)
+
+        self.stackedWidget.addWidget(view)
+
+    def createView3(self):
+        view = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel('Test 3', self))
+        view.setLayout(layout)
+
+        self.stackedWidget.addWidget(view)
 
 
 
@@ -56,7 +89,7 @@ class QInfoWidget(QWidget):
         self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
         self.accessibleLayout.setSpacing(0)
         self.plotImage = MatplotlibWidget()
-        self.accessibleLayout.addWidget(self.plotImage)
         self.accessibleLayout.addWidget(NavigationSettingsWidget())
+        self.accessibleLayout.addWidget(self.plotImage)
         self.setLayout(self.accessibleLayout)
        
