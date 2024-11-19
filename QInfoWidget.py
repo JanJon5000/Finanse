@@ -30,26 +30,15 @@ class NavigationSettingsWidget(QWidget):
         super().__init__()
         self.accessibleLayout = QVBoxLayout()
         self.buttonLayout = QHBoxLayout()
+        self.buttonWidget = QWidget()
         self.stackedWidget = QStackedWidget()
 
         self.createView1()
         self.createView2()
         self.createView3()
+        self.setButtonProperties()
 
-        
-        button = QPushButton(f'test 1', self)
-        button.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
-        self.buttonLayout.addWidget(button)
-
-        button2 = QPushButton(f'test 2', self)
-        button2.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
-        self.buttonLayout.addWidget(button2)
-
-        button3 = QPushButton(f'test 3', self)
-        button3.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(2))
-        self.buttonLayout.addWidget(button3)
-
-        self.accessibleLayout.addLayout(self.buttonLayout)
+        self.accessibleLayout.addWidget(self.buttonWidget)
         self.accessibleLayout.addWidget(self.stackedWidget)
 
         self.setLayout(self.accessibleLayout)
@@ -78,7 +67,29 @@ class NavigationSettingsWidget(QWidget):
 
         self.stackedWidget.addWidget(view)
 
+    def setButtonProperties(self) -> None:
+        self.buttonObjList = []
+        self.buttonGroup = QButtonGroup(self)
+        self.buttonGroup.buttonToggled.connect(self.refreshData)
+        self.buttonGroup.setExclusive(True)
+        for i in [('Kategorie', lambda: self.stackedWidget.setCurrentIndex(0)),
+                   ('Osoby', lambda: self.stackedWidget.setCurrentIndex(1)), 
+                   ('Czas', lambda: self.stackedWidget.setCurrentIndex(2))]:
+            self.buttonObjList.append(QPushButton(i[0], self))
+            self.buttonGroup.addButton(self.buttonObjList[-1])
+            self.buttonObjList[-1].setObjectName('buttonListItem')
+            self.buttonObjList[-1].setCheckable(True)
+            self.buttonObjList[-1].clicked.connect(i[1])
+            self.buttonLayout.addWidget(self.buttonObjList[-1])
 
+        self.buttonLayout.setSpacing(0)
+        self.buttonLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.buttonWidget.setLayout(self.buttonLayout)
+        self.buttonWidget.setObjectName('buttonWidg')
+
+    def refreshData(self):
+        pass
 
 class QInfoWidget(QWidget):
     def __init__(self, data, currentPlotType) -> None:
@@ -89,7 +100,15 @@ class QInfoWidget(QWidget):
         self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
         self.accessibleLayout.setSpacing(0)
         self.plotImage = MatplotlibWidget()
-        self.accessibleLayout.addWidget(NavigationSettingsWidget())
+        self.navWidget = NavigationSettingsWidget()
+        self.accessibleLayout.addWidget(self.navWidget)
         self.accessibleLayout.addWidget(self.plotImage)
         self.setLayout(self.accessibleLayout)
+        with open('styleSHEETS/info_stylesheet.qss', 'r') as file:
+            style = file.read()
+            self.setStyleSheet(style)
+
+    
+    def updateData(self, data) -> None:
+        pass
        
