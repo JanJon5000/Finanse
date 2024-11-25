@@ -17,6 +17,7 @@
     background-color: None;
 }
 
+
 * {
     background-color: white;
 }

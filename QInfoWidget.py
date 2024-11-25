@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QSizePolicy, QHBoxLayout, QButtonGroup, QStackedWidget, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QSizePolicy, QHBoxLayout, QButtonGroup, QStackedWidget, QPushButton, QCheckBox
 from fundamentalClasses import SQL_SINGLE_INSTANCE
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -8,7 +8,7 @@ import numpy as np
 
 
 class MatplotlibWidget(QWidget):
-    def __init__(self):
+    def __init__(self, data, plotType):
         super().__init__()
         layout = QVBoxLayout(self)
         self.figure = Figure()
@@ -25,61 +25,58 @@ class MatplotlibWidget(QWidget):
         ax.plot(x, y)
         self.canvas.draw()
 
+    def clear_layout(self, layout):
+        self.prevVariables = []
+        if layout is not None:
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget() is not None:
+                    if not isinstance(child.widget(), QPushButton):
+                        try:
+                            self.prevVariables.append(child.widget().text())
+                        except:
+                            self.prevVariables.append(child.widget().date())
+                    child.widget().deleteLater()
+                elif child.layout() is not None:
+                    self.clear_layout(child.layout())
+    
 class NavigationSettingsWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.accessibleLayout = QVBoxLayout()
         self.buttonLayout = QHBoxLayout()
         self.buttonWidget = QWidget()
-        self.stackedWidget = QStackedWidget()
+        self.currentGraph = 'Kategorie'
+        self.balanceCheckBox = QCheckBox('saldo wypadkowe (SW)')
+        self.medianCheckBox = QCheckBox('prosta mediany')
+        self.avgCheckBox = QCheckBox('prosta średniej')
 
-        self.createView1()
-        self.createView2()
-        self.createView3()
+        self.balanceCheckBox.setChecked(False)
+        self.medianCheckBox.setChecked(False)
+        self.avgCheckBox.setChecked(False)
         self.setButtonProperties()
 
         self.accessibleLayout.addWidget(self.buttonWidget)
-        self.accessibleLayout.addWidget(self.stackedWidget)
-
+        self.accessibleLayout.addWidget(self.balanceCheckBox)
+        self.accessibleLayout.addWidget(self.medianCheckBox)
+        self.accessibleLayout.addWidget(self.avgCheckBox)
+        self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
+        self.accessibleLayout.setSpacing(0)
         self.setLayout(self.accessibleLayout)
 
-    def createView1(self):
-        view = QWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel('Test 1', self))
-        view.setLayout(layout)
 
-        self.stackedWidget.addWidget(view)
-
-    def createView2(self):
-        view = QWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel('Test 2', self))
-        view.setLayout(layout)
-
-        self.stackedWidget.addWidget(view)
-
-    def createView3(self):
-        view = QWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel('Test 3', self))
-        view.setLayout(layout)
-
-        self.stackedWidget.addWidget(view)
+    
 
     def setButtonProperties(self) -> None:
         self.buttonObjList = []
         self.buttonGroup = QButtonGroup(self)
         self.buttonGroup.buttonToggled.connect(self.refreshData)
         self.buttonGroup.setExclusive(True)
-        for i in [('Kategorie', lambda: self.stackedWidget.setCurrentIndex(0)),
-                   ('Osoby', lambda: self.stackedWidget.setCurrentIndex(1)), 
-                   ('Czas', lambda: self.stackedWidget.setCurrentIndex(2))]:
-            self.buttonObjList.append(QPushButton(i[0], self))
+        for i in 'Kategorie', 'Osoby', 'Czas':
+            self.buttonObjList.append(QPushButton(i, self))
             self.buttonGroup.addButton(self.buttonObjList[-1])
             self.buttonObjList[-1].setObjectName('buttonListItem')
             self.buttonObjList[-1].setCheckable(True)
-            self.buttonObjList[-1].clicked.connect(i[1])
             self.buttonLayout.addWidget(self.buttonObjList[-1])
 
         self.buttonLayout.setSpacing(0)
@@ -99,7 +96,7 @@ class QInfoWidget(QWidget):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
         self.accessibleLayout.setSpacing(0)
-        self.plotImage = MatplotlibWidget()
+        self.plotImage = MatplotlibWidget(data, currentPlotType)
         self.navWidget = NavigationSettingsWidget()
         self.accessibleLayout.addWidget(self.navWidget)
         self.accessibleLayout.addWidget(self.plotImage)
