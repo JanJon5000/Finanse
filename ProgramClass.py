@@ -194,10 +194,6 @@ class Program(CORE, QWidget):
         self.orderWidget.changedFilter.connect(self.refresh)
         self.mainGrid.addWidget(self.orderWidget, 0, 1, 1, 4)
 
-        # widget for the stats of the user
-        self.statWidget = QInfoWidget(self.shownContent, None)
-        self.mainGrid.addWidget(self.statWidget, 0, 6, 5, 1)
-        
         # seperate widget with seperate layout of the data, after ordering after filters
         scrollableDataWidget = QScrollArea()
         dataWidget = QWidget()
@@ -216,6 +212,10 @@ class Program(CORE, QWidget):
                 placeholder.setStyleSheet(style)
                 placeholder.dataChanged.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
+        # widget for the stats of the user 
+        self.statWidget = QInfoWidget(self.shownContent, "osoby")
+        self.mainGrid.addWidget(self.statWidget, 0, 6, 5, 1)
+
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)
         scrollableDataWidget.setWidget(dataWidget)

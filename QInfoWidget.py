@@ -5,40 +5,54 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
+from datetime import date, timedelta
 
 
 class MatplotlibWidget(QWidget):
-    def __init__(self, data, plotType):
+    def __init__(self, data, plotType) -> None:
         super().__init__()
+        self.graphData = data
+        self.plotType = plotType
         layout = QVBoxLayout(self)
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         layout.addWidget(self.canvas)
         self.figure.tight_layout()
         self.setLayout(layout)
-        self.plot()
+        self.plot(plotType)
 
-    def plot(self):
-        x = np.linspace(0, 10, 100)
-        y = np.sin(x)
-        ax = self.figure.add_subplot(111)
-        ax.plot(x, y)
-        self.canvas.draw()
+    def plot(self, plotType: str) -> None:
+        match plotType:
+            case "osoby":
+                dates = [date(int(lineOfData[-1][:4]), int(lineOfData[-1][5:7]), int(lineOfData[-1][8:]))for lineOfData in self.graphData]
+                dates = [min(dates) + timedelta(days=i) for i in range((max(dates) - min(dates)).days + 1)]
+                values = np.ones((378,1))
+                ax = self.figure.add_subplot(111)
+                ax.plot(dates, values)
+                self.canvas.draw()
+            case "czas":
+                pass
+            case "kategorie":
+                pass
+            case _:
+                x = np.linspace(0, 10, 100)
+                y = np.sin(x)
+                ax = self.figure.add_subplot(111)
+                ax.plot(x, y)
+                self.canvas.draw()
 
-    def clear_layout(self, layout):
+    def clearLayout(self, layout):
         self.prevVariables = []
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
                 if child.widget() is not None:
-                    if not isinstance(child.widget(), QPushButton):
-                        try:
-                            self.prevVariables.append(child.widget().text())
-                        except:
-                            self.prevVariables.append(child.widget().date())
                     child.widget().deleteLater()
                 elif child.layout() is not None:
                     self.clear_layout(child.layout())
+    
+    def refreshData(self):
+        pass
     
 class NavigationSettingsWidget(QWidget):
     def __init__(self):
