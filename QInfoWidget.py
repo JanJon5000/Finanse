@@ -24,12 +24,7 @@ class MatplotlibWidget(QWidget):
     def plot(self, plotType: str) -> None:
         match plotType:
             case "osoby":
-                dates = [date(int(lineOfData[-1][:4]), int(lineOfData[-1][5:7]), int(lineOfData[-1][8:]))for lineOfData in self.graphData]
-                dates = [min(dates) + timedelta(days=i) for i in range((max(dates) - min(dates)).days + 1)]
-                values = np.ones((378,1))
-                ax = self.figure.add_subplot(111)
-                ax.plot(dates, values)
-                self.canvas.draw()
+                pass
             case "czas":
                 pass
             case "kategorie":

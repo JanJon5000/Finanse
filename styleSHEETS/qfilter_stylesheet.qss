@@ -1,5 +1,5 @@
 
-QWidget {
+#white{
     border: 2px solid #A9A9A9;  
     border-radius: 4px;         
 }
@@ -44,10 +44,6 @@ QDateEdit::up-arrow {
     background-color: #ff0000;
 }
 
-#edit {
-    font-size: 20px;
-}
-
 #range {
     font-size: 15px;
     color: #d3d3d3; 
@@ -55,6 +51,16 @@ QDateEdit::up-arrow {
     margin: 0px;
 }
 
+#smaller {
+    font-size: 10px;
+}
+
 * {
     font-size: 20px
+}
+
+#tytul{
+    padding: 0px;
+    margin: 0px;
+    font-weight: bold;
 }

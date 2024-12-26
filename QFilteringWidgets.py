@@ -14,10 +14,12 @@ class QListFilter(QWidget):
         self.qListPart = QListWidget()
         self.qListPart.addItems(self.content)
         self.qListPart.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.qListPart.setObjectName('smaller')
         # user can select multiple
         self.qListPart.setSelectionMode(QListWidget.ExtendedSelection)
 
         self.qScrollPart.setWidget(self.qListPart)
+        self.qScrollPart.setObjectName('white')
 
         # a fixed layout of the widget
         self.accesibleLayout = QGridLayout(self)
@@ -107,7 +109,7 @@ class QFromToFilter(QWidget):
             
             self.labels = [QLabel(str(self.minValue)), QLabel(str(self.maxValue))]
             
-        # date case
+        # handling date case
         if isinstance(min, date) and isinstance(max, date):
             self.doesShowFullRange = True
             # flag variable for later
@@ -139,8 +141,8 @@ class QFromToFilter(QWidget):
         
         self.labels[0].setObjectName('range')
         self.labels[1].setObjectName('range')
-        self.biggerData.setObjectName('edit')
-        self.smallerData.setObjectName('edit')
+        self.biggerData.setObjectName('white')
+        self.smallerData.setObjectName('white')
         # a layout of the widget
         self.accesibleLayout = QGridLayout()
         self.accesibleLayout.addWidget(self.labels[0], 0, 0)
@@ -222,6 +224,7 @@ class QFTLFilter(QWidget):
         self.qComboComponent = QComboBox()
         # a combobox which by the user chooses which filter widget they want to filter the data with
         self.qComboComponent.addItems(['Zakres', 'Konkretne wartości'])
+        self.qComboComponent.setObjectName('white')
         self.qComboComponent.setCurrentIndex(self.flag)
         self.qComboComponent.currentIndexChanged.connect(self.refresh)
         

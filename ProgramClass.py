@@ -110,6 +110,7 @@ class Program(CORE, QWidget):
         self.consolidatedFilterWidget.setMaximumWidth(350)
         self.consolidatedFilterWidget.setObjectName('filterStatus')
         self.filterLayout = QVBoxLayout()
+        title1 = QLabel('Daty:'); title1.setObjectName('tytul'); self.filterLayout.addWidget(title1)
 
         # widget responsible for determining which 'date range' is supposed to be shown
         self.cursor.execute("SELECT date from transactions WHERE 1=1")
@@ -126,7 +127,8 @@ class Program(CORE, QWidget):
             self.dataFilter.currentFilter[self.filterContents['transactions.date'][0]].select_items(self.filterContents['transactions.date'][1])
         self.dataFilter.setObjectName('transactions.date')
         self.filterLayout.addWidget(self.dataFilter)
-
+        title2 = QLabel('Kwoty:'); title2.setObjectName('tytul'); self.filterLayout.addWidget(title2)
+        
         # widget responsible for determining which 'ammount range' is supposed to be displayed
         self.cursor.execute("SELECT money FROM transactions WHERE 1=1")
         sums = [i[0] for i in self.cursor.fetchall()]
@@ -141,6 +143,7 @@ class Program(CORE, QWidget):
             self.sumFilter.currentFilter[self.filterContents['transactions.money'][0]].select_items(self.filterContents['transactions.money'][1])
         self.sumFilter.setObjectName('transactions.money')
         self.filterLayout.addWidget(self.sumFilter)
+        title3 = QLabel('Kategorie:'); title3.setObjectName('tytul'); self.filterLayout.addWidget(title3)
 
         # widget responsible for determining which categories are supposed to be displayed
         self.cursor.execute('SELECT name FROM categories WHERE 1=1')
@@ -151,7 +154,8 @@ class Program(CORE, QWidget):
             self.categoryFilter.select_items(self.filterContents['categories.name'])
         self.categoryFilter.setObjectName('categories.name')
         self.filterLayout.addWidget(self.categoryFilter)
-        
+        title4 = QLabel('Osoby:'); title4.setObjectName('tytul'); self.filterLayout.addWidget(title4)
+
         # widget responsible for determining which names are supposed to be displayed
         self.cursor.execute('SELECT personName FROM people WHERE 1=1')
         people = [i[0] for i in list(set(self.cursor.fetchall()))]
