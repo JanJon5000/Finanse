@@ -1,7 +1,12 @@
 * {
-    padding: None;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 35px;
+    padding-right: 35px;
     background-color: white;
     border: 3px white;
+    margin-left: 20px;
+    margin-bottom: 0px;
 }
 
 QWidget {
