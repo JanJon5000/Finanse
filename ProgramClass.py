@@ -217,7 +217,7 @@ class Program(CORE, QWidget):
                 placeholder.dataChanged.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
         # widget for the stats of the user 
-        self.statWidget = QInfoWidget(self.shownContent, "osoby")
+        self.statWidget = QInfoWidget(self.shownContent)
         self.mainGrid.addWidget(self.statWidget, 0, 6, 5, 1)
 
         dataWidget.setLayout(dataLayout)

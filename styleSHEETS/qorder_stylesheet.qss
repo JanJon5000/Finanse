@@ -17,7 +17,7 @@ QPushButton {
     background-color: white;
     color: black;
     border: 3px black;
-    font-size: 14px;
+    font-size: 11px;
 }
 
 QPushButton:focus {
@@ -30,6 +30,6 @@ QPushButton:first-child {
 }
 
 QPushButton:last-child {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
 }

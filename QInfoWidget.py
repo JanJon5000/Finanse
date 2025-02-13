@@ -5,36 +5,42 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
-from datetime import date, timedelta
-
+from datetime import date, timedelta, datetime
 
 class MatplotlibWidget(QWidget):
-    def __init__(self, data, plotType) -> None:
+    def __init__(self, data) -> None:
         super().__init__()
         self.graphData = data
-        self.plotType = plotType
         layout = QVBoxLayout(self)
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
         layout.addWidget(self.canvas)
         self.figure.tight_layout()
         self.setLayout(layout)
-        self.plot(plotType)
+        self.plot()
 
-    def plot(self, plotType: str) -> None:
-        match plotType:
-            case "osoby":
-                pass
-            case "czas":
-                pass
-            case "kategorie":
-                pass
-            case _:
-                x = np.linspace(0, 10, 100)
-                y = np.sin(x)
-                ax = self.figure.add_subplot(111)
-                ax.plot(x, y)
-                self.canvas.draw()
+    def plot(self) -> None:
+        print(self.graphData)
+        plt.style.use('dark_background')
+        fig, ax = plt.subplots()
+        x = [date(2010, 12, 1),
+            date(2011, 1, 4),
+            date(2012, 1, 4),
+            date(2011, 9, 4),
+            date(2011, 8, 4),
+            date(2011, 7, 4),
+            date(2011, 6, 4),
+            date(2011, 5, 5)]
+        y = [4.8, -5.5, -3.5, 4.6, -6.5, 6.6, 2.6, 3.0]
+        colors = [(1, 0, 0) if i<0 else (0, 1, 0) for i in y]
+        ax = self.figure.add_subplot(111)
+        
+        ax.bar(x, y, width=2, color=colors, edgecolor="white", linewidth=0.4)
+        ax.set(adjustable='box', ylim=(-9, 8), yticks=np.arange(-10, 8))
+        ax.xaxis_date()
+        self.canvas.draw()
+
+
 
     def clearLayout(self, layout):
         self.prevVariables = []
@@ -48,66 +54,16 @@ class MatplotlibWidget(QWidget):
     
     def refreshData(self):
         pass
-    
-class NavigationSettingsWidget(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.accessibleLayout = QVBoxLayout()
-        self.buttonLayout = QHBoxLayout()
-        self.buttonWidget = QWidget()
-        self.currentGraph = 'Kategorie'
-        self.balanceCheckBox = QCheckBox('saldo wypadkowe (SW)')
-        self.medianCheckBox = QCheckBox('prosta mediany')
-        self.avgCheckBox = QCheckBox('prosta średniej')
-
-        self.balanceCheckBox.setChecked(False)
-        self.medianCheckBox.setChecked(False)
-        self.avgCheckBox.setChecked(False)
-        self.setButtonProperties()
-
-        self.accessibleLayout.addWidget(self.buttonWidget)
-        self.accessibleLayout.addWidget(self.balanceCheckBox)
-        self.accessibleLayout.addWidget(self.medianCheckBox)
-        self.accessibleLayout.addWidget(self.avgCheckBox)
-        self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
-        self.accessibleLayout.setSpacing(0)
-        self.setLayout(self.accessibleLayout)
-
-
-    
-
-    def setButtonProperties(self) -> None:
-        self.buttonObjList = []
-        self.buttonGroup = QButtonGroup(self)
-        self.buttonGroup.buttonToggled.connect(self.refreshData)
-        self.buttonGroup.setExclusive(True)
-        for i in 'Kategorie', 'Osoby', 'Czas':
-            self.buttonObjList.append(QPushButton(i, self))
-            self.buttonGroup.addButton(self.buttonObjList[-1])
-            self.buttonObjList[-1].setObjectName('buttonListItem')
-            self.buttonObjList[-1].setCheckable(True)
-            self.buttonLayout.addWidget(self.buttonObjList[-1])
-
-        self.buttonLayout.setSpacing(0)
-        self.buttonLayout.setContentsMargins(0, 0, 0, 0)
-
-        self.buttonWidget.setLayout(self.buttonLayout)
-        self.buttonWidget.setObjectName('buttonWidg')
-
-    def refreshData(self):
-        pass
 
 class QInfoWidget(QWidget):
-    def __init__(self, data, currentPlotType) -> None:
+    def __init__(self, data) -> None:
         super().__init__()
         self.accessibleLayout = QVBoxLayout()
         self.data = data
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
         self.accessibleLayout.setSpacing(0)
-        self.plotImage = MatplotlibWidget(data, currentPlotType)
-        self.navWidget = NavigationSettingsWidget()
-        self.accessibleLayout.addWidget(self.navWidget)
+        self.plotImage = MatplotlibWidget(data)
         self.accessibleLayout.addWidget(self.plotImage)
         self.setLayout(self.accessibleLayout)
         with open('styleSHEETS/info_stylesheet.qss', 'r') as file:
