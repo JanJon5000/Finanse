@@ -10,6 +10,9 @@ from datetime import date, timedelta, datetime
 class MatplotlibWidget(QWidget):
     def __init__(self, data) -> None:
         super().__init__()
+        with open('styleSHEETS/info_stylesheet.qss', 'r') as file:
+            style = file.read()
+            self.setStyleSheet(style)
         self.graphData = data
         layout = QVBoxLayout(self)
         self.figure = Figure()
@@ -20,23 +23,20 @@ class MatplotlibWidget(QWidget):
         self.plot()
 
     def plot(self) -> None:
-        print(self.graphData)
         plt.style.use('dark_background')
         fig, ax = plt.subplots()
-        x = [date(2010, 12, 1),
-            date(2011, 1, 4),
-            date(2012, 1, 4),
-            date(2011, 9, 4),
-            date(2011, 8, 4),
-            date(2011, 7, 4),
-            date(2011, 6, 4),
-            date(2011, 5, 5)]
-        y = [4.8, -5.5, -3.5, 4.6, -6.5, 6.6, 2.6, 3.0]
+        x = [date(int(i[-1][0:4]), int(i[-1][5:7]), int(i[-1][8:])) for i in self.graphData]
+        y = [sum([i[-2] for i in self.graphData if i[-1] == j]) for j in [k.strftime("%Y-%m-%d") for k in x]]
         colors = [(1, 0, 0) if i<0 else (0, 1, 0) for i in y]
         ax = self.figure.add_subplot(111)
         
-        ax.bar(x, y, width=2, color=colors, edgecolor="white", linewidth=0.4)
-        ax.set(adjustable='box', ylim=(-9, 8), yticks=np.arange(-10, 8))
+        barplot = ax.bar(x, y, width=0.1, color=colors)
+        label_step = (max(y) - min(y)) / 20
+        labels = [int(min(y) + i * label_step) for i in range(20)]
+
+        # Add labels to the bars
+        ax.bar_label(barplot, labels=labels[:len(barplot)], label_type="edge")
+        ax.set(adjustable='box', ylim=(min(y)-100, max(y)+100))
         ax.xaxis_date()
         self.canvas.draw()
 
