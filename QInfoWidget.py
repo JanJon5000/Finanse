@@ -6,6 +6,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
 from datetime import date, timedelta, datetime
+from math import log10
 
 class MatplotlibWidget(QWidget):
     def __init__(self, data) -> None:
@@ -24,20 +25,20 @@ class MatplotlibWidget(QWidget):
 
     def plot(self) -> None:
         plt.style.use('dark_background')
+        print(self.graphData)
         fig, ax = plt.subplots()
-        x = [date(int(i[-1][0:4]), int(i[-1][5:7]), int(i[-1][8:])) for i in self.graphData]
+        x = sorted(list(set([date(int(i[-1][0:4]), int(i[-1][5:7]), int(i[-1][8:])) for i in self.graphData])))
         y = [sum([i[-2] for i in self.graphData if i[-1] == j]) for j in [k.strftime("%Y-%m-%d") for k in x]]
+
         colors = [(1, 0, 0) if i<0 else (0, 1, 0) for i in y]
         ax = self.figure.add_subplot(111)
         
         barplot = ax.bar(x, y, width=0.1, color=colors)
-        label_step = (max(y) - min(y)) / 20
-        labels = [int(min(y) + i * label_step) for i in range(20)]
 
-        # Add labels to the bars
-        ax.bar_label(barplot, labels=labels[:len(barplot)], label_type="edge")
-        ax.set(adjustable='box', ylim=(min(y)-100, max(y)+100))
+        ax.bar_label(barplot, labels=y, label_type="edge")
+        ax.set(adjustable='box', ylim=(min(y)*1.2, max(y)*1.2))
         ax.xaxis_date()
+        ax.set_xticklabels(x, rotation=75)
         self.canvas.draw()
 
 
@@ -73,4 +74,3 @@ class QInfoWidget(QWidget):
     
     def updateData(self, data) -> None:
         pass
-       

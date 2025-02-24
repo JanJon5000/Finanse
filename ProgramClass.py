@@ -200,6 +200,7 @@ class Program(CORE, QWidget):
 
         # seperate widget with seperate layout of the data, after ordering after filters
         scrollableDataWidget = QScrollArea()
+        scrollableDataWidget.setFixedHeight(250)
         dataWidget = QWidget()
         dataLayout = QVBoxLayout()
         self.show_table(self.filters, self.orderFilters, self.settings['rowNumber'])
@@ -218,12 +219,13 @@ class Program(CORE, QWidget):
                 dataLayout.addWidget(placeholder)
         # widget for the stats of the user 
         self.statWidget = QInfoWidget(self.shownContent)
-        self.mainGrid.addWidget(self.statWidget, 0, 6, 5, 1)
+        self.mainGrid.addWidget(self.statWidget, 2, 1, 5, 5)
 
         dataWidget.setLayout(dataLayout)
         scrollableDataWidget.setWidgetResizable(True)
         scrollableDataWidget.setWidget(dataWidget)
-        self.mainGrid.addWidget(scrollableDataWidget, 1, 1, 5, 5)
+        
+        self.mainGrid.addWidget(scrollableDataWidget, 1, 1, 1, 5)
         self.mainGrid.setRowStretch(0, 1)
         self.mainGrid.setRowStretch(1, 5)
 
