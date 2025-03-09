@@ -1,76 +1,122 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QSizePolicy, QHBoxLayout, QButtonGroup, QStackedWidget, QPushButton, QCheckBox
+from PyQt5.QtChart import QChart, QPieSeries, QChartView, QChartView, QBarSet, QBarSeries, QBarCategoryAxis
+from PyQt5.QtGui import QPainter, QColor
 from fundamentalClasses import SQL_SINGLE_INSTANCE
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+
 import numpy as np
 from datetime import date, timedelta, datetime
 from math import log10
 
-class MatplotlibWidget(QWidget):
-    def __init__(self, data) -> None:
+class CircleWidget(QWidget):
+    def __init__(self, data, title, index):
         super().__init__()
-        with open('styleSHEETS/info_stylesheet.qss', 'r') as file:
-            style = file.read()
-            self.setStyleSheet(style)
-        self.graphData = data
+
+        self.index = index
+        self.data = data
+        self.title = title
+        self.setGeometry(100, 100, 300, 300)
+
         layout = QVBoxLayout(self)
-        self.figure = Figure()
-        self.canvas = FigureCanvas(self.figure)
-        layout.addWidget(self.canvas)
-        self.figure.tight_layout()
+        chart_view = self.create_donutchart()
+        layout.addWidget(chart_view)
+
         self.setLayout(layout)
-        self.plot()
 
-    def plot(self) -> None:
-        plt.style.use('dark_background')
-        print(self.graphData)
-        fig, ax = plt.subplots()
-        x = sorted(list(set([date(int(i[-1][0:4]), int(i[-1][5:7]), int(i[-1][8:])) for i in self.graphData])))
-        y = [sum([i[-2] for i in self.graphData if i[-1] == j]) for j in [k.strftime("%Y-%m-%d") for k in x]]
+    def create_donutchart(self):
+        series = QPieSeries()
+        #print(self.data)
+        chartableData = {i[self.index]:sum([s[-2] for s in self.data if s[self.index] == i[self.index] and s[-2]<0]) for i in self.data}
+        print(chartableData)
+        series.setHoleSize(0.50)
+        series.append("Protein 4.2%", 4.2)
+        slice = series.append("Fat 15.6%", 15.6)
+        slice.setLabelVisible()
+        series.append("Other 23.8%", 23.8)
+        series.append("Carbs 56.4%", 56.4)
 
-        colors = [(1, 0, 0) if i<0 else (0, 1, 0) for i in y]
-        ax = self.figure.add_subplot(111)
+        chart = QChart()
+        chart.legend().hide()
+        chart.addSeries(series)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTitle(self.title)
         
-        barplot = ax.bar(x, y, width=0.1, color=colors)
 
-        ax.bar_label(barplot, labels=y, label_type="edge")
-        ax.set(adjustable='box', ylim=(min(y)*1.2, max(y)*1.2))
-        ax.xaxis_date()
-        ax.set_xticklabels(x, rotation=75)
-        self.canvas.draw()
+        chart_view = QChartView(chart)
+        chart_view.setRenderHint(QPainter.Antialiasing)
 
-
-
+        return chart_view
     def clearLayout(self, layout):
-        self.prevVariables = []
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
-                if child.widget() is not None:
+                if child.widget():
                     child.widget().deleteLater()
-                elif child.layout() is not None:
-                    self.clear_layout(child.layout())
-    
-    def refreshData(self):
-        pass
+                elif child.layout():
+                    self.clearLayout(child.layout())
+
+class BarWidget(QWidget):
+    def __init__(self, data):
+        super().__init__()
+        self.setGeometry(100,100, 200, 300)
+
+        self.data = data
+        layout = QVBoxLayout(self)
+        chart_view = self.create_bar()
+        layout.addWidget(chart_view)
+        self.setLayout(layout)
+        self.show()
+        
+
+    def create_bar(self):
+        set0 = QBarSet(None)
+        set0.setColor(QColor(0, 255, 0))
+        set1 = QBarSet(None)
+        set1.setColor(QColor(255, 0, 0))
+        set0 << sum([i[-2] for i in self.data if i[-2] > 0]) 
+        set1 << abs(sum([i[-2] for i in self.data if i[-2] < 0]))
+
+        series = QBarSeries()
+        series.append(set0)
+        series.append(set1)
+
+        chart = QChart()
+
+        chart.legend().setVisible(False)
+        chart.addSeries(series)
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        
+        categories = ["Zyski/Straty"]
+        axis = QBarCategoryAxis() 
+        axis.append(categories)
+        chart.createDefaultAxes()
+        chart.setAxisX(axis, series)
+
+        chartView = QChartView(chart)
+        chartView.setRenderHint(QPainter.Antialiasing)
+
+        return chartView
 
 class QInfoWidget(QWidget):
     def __init__(self, data) -> None:
         super().__init__()
-        self.accessibleLayout = QVBoxLayout()
         self.data = data
+        self.accessibleLayout = QHBoxLayout()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
         self.accessibleLayout.setSpacing(0)
-        self.plotImage = MatplotlibWidget(data)
-        self.accessibleLayout.addWidget(self.plotImage)
+        self.balanceWidget = BarWidget(self.data)
+        self.gainsWidget = CircleWidget(self.data, "Wydatki ze wzgledu na kategorie", 1)
+        self.lossesImage = CircleWidget(self.data, "Wydatki ze wzgledu na osoby", 0)
+        self.accessibleLayout.addWidget(self.balanceWidget)
+        self.accessibleLayout.addWidget(self.gainsWidget)
+        self.accessibleLayout.addWidget(self.lossesImage)
         self.setLayout(self.accessibleLayout)
+
         with open('styleSHEETS/info_stylesheet.qss', 'r') as file:
             style = file.read()
             self.setStyleSheet(style)
 
-    
     def updateData(self, data) -> None:
-        pass
+        self.gainsWidget.graphData = data
+        self.gainsWidget.refreshData() 

@@ -31,13 +31,15 @@ class CORE(SQL_SINGLE_INSTANCE):
                     command += '('
                     command += self.filters[key]
                     command += ')'
-                if list(self.filters.keys()).index(key) > len(list(self.filters.keys()))-1:
                     command += " AND "
+            if command[-5:] == ' AND ':
+                command = command[:-5]
+            
         if i == 0:
              command  = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         command += f" ORDER BY {self.orderFilters[:-4]} COLLATE NOCASE {self.orderFilters[-4:]} "
 
-        print(command)
+        print(command, self.filters)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
     def show_graph() -> None: 
@@ -66,7 +68,7 @@ class Program(CORE, QWidget):
         #setting the layout to grid
         self.mainGrid = QGridLayout()
         self.populate_grid()
-        
+       
         self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
         self.show()
 
