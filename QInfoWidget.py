@@ -25,15 +25,12 @@ class CircleWidget(QWidget):
 
     def create_donutchart(self):
         series = QPieSeries()
-        #print(self.data)
+        
         chartableData = {i[self.index]:sum([s[-2] for s in self.data if s[self.index] == i[self.index] and s[-2]<0]) for i in self.data}
-        print(chartableData)
         series.setHoleSize(0.50)
-        series.append("Protein 4.2%", 4.2)
-        slice = series.append("Fat 15.6%", 15.6)
-        slice.setLabelVisible()
-        series.append("Other 23.8%", 23.8)
-        series.append("Carbs 56.4%", 56.4)
+        for key in list(chartableData.keys()):
+            slice = series.append(key, chartableData[key])
+            slice.setLabelVisible(True)
 
         chart = QChart()
         chart.legend().hide()
