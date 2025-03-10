@@ -1,17 +1,17 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QSizePolicy, QHBoxLayout, QButtonGroup, QStackedWidget, QPushButton, QCheckBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy, QHBoxLayout
 from PyQt5.QtChart import QChart, QPieSeries, QChartView, QChartView, QBarSet, QBarSeries, QBarCategoryAxis
 from PyQt5.QtGui import QPainter, QColor
-from fundamentalClasses import SQL_SINGLE_INSTANCE
 
 import numpy as np
 from datetime import date, timedelta, datetime
 from math import log10
 
 class CircleWidget(QWidget):
-    def __init__(self, data, title, index):
+    def __init__(self, data, title, index, colors = None):
         super().__init__()
 
+        if colors != None:
+            self.colors = colors
         self.index = index
         self.data = data
         self.title = title
@@ -30,7 +30,12 @@ class CircleWidget(QWidget):
         series.setHoleSize(0.50)
         for key in list(chartableData.keys()):
             slice = series.append(key, chartableData[key])
-            slice.setLabelVisible(True)
+            if chartableData[key] != 0:
+                slice.setLabelVisible(True)
+                try:
+                    slice.setColor(QColor(tuple(self.colors[key])[0], tuple(self.colors[key])[1], tuple(self.colors[key])[2]))
+                except:
+                    pass
 
         chart = QChart()
         chart.legend().hide()
@@ -95,15 +100,16 @@ class BarWidget(QWidget):
         return chartView
 
 class QInfoWidget(QWidget):
-    def __init__(self, data) -> None:
+    def __init__(self, data, colors) -> None:
         super().__init__()
         self.data = data
+        self.colors = colors
         self.accessibleLayout = QHBoxLayout()
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.accessibleLayout.setContentsMargins(0, 0, 0, 0)
         self.accessibleLayout.setSpacing(0)
         self.balanceWidget = BarWidget(self.data)
-        self.gainsWidget = CircleWidget(self.data, "Wydatki ze wzgledu na kategorie", 1)
+        self.gainsWidget = CircleWidget(self.data, "Wydatki ze wzgledu na kategorie", 1, colors)
         self.lossesImage = CircleWidget(self.data, "Wydatki ze wzgledu na osoby", 0)
         self.accessibleLayout.addWidget(self.balanceWidget)
         self.accessibleLayout.addWidget(self.gainsWidget)

@@ -211,6 +211,7 @@ class Program(CORE, QWidget):
         self.cursor.execute('SELECT name, RGB FROM categories WHERE 1=1')
         colors = self.cursor.fetchall()
         colors = {tpl[0]:[int(i) for i in tpl[1].split(',')] for tpl in colors}
+        
         # setting the colors of 'money' value depending on its 'isIncome' property
         with open('styleSHEETS/data_stylesheet.qss', 'r') as file:
             style = file.read()
@@ -220,7 +221,7 @@ class Program(CORE, QWidget):
                 placeholder.dataChanged.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
         # widget for the stats of the user 
-        self.statWidget = QInfoWidget(self.shownContent)
+        self.statWidget = QInfoWidget(self.shownContent, colors)
         self.mainGrid.addWidget(self.statWidget, 2, 1, 5, 5)
 
         dataWidget.setLayout(dataLayout)

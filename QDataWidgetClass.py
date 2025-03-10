@@ -110,6 +110,12 @@ class QDataWidget(QWidget):
         HANDLE.create_new_transaction(transaction(self.prevVariables[-1], self.prevVariables[2], newRecordData[1], newRecordData[0]))
         self.variables = self.prevVariables
 
+    def __del__(self, layout):
+        HANDLE = SQL_SINGLE_INSTANCE()
+        idOfOther = HANDLE.cursor.execute(f"SELECT idOfOther FROM people WHERE personName = '{self.variables[0]}'")
+        idCategory = HANDLE.cursor.execute(f"SELECT idCategory FROM categories WHERE name = '{self.variables[1]}'")
+        HANDLE.cursor.execute(f"DELETE TOP(1) FROM transactions WHERE idCategory = {idCategory} AND idOfOther = {idOfOther} AND date = {self.variables[-1]} AND money = {self.variables[-2]}")
+
     def clear_layout(self, layout):
         self.prevVariables = []
         if layout is not None:
