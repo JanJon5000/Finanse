@@ -6,6 +6,7 @@ from random import randint
 
 class QDataWidget(QWidget):
     dataChanged = pyqtSignal()
+    deleted = pyqtSignal()
     def __init__(self, variables: list, colors: list) -> None:
         super().__init__()
         self.readLayout = QHBoxLayout()
@@ -13,6 +14,7 @@ class QDataWidget(QWidget):
         self.variables = variables
         self.prevVariables = variables
         self.colors = colors
+
 
         self.populateLine()
         self.setLayout(self.readLayout)
@@ -68,6 +70,9 @@ class QDataWidget(QWidget):
             x.clicked.connect(self.changeLayout)
             x.clicked.connect(self.dataChanged.emit)
             self.readLayout.addWidget(x)
+        self.deleteButton = QPushButton("Usun")
+        self.deleteButton.clicked.connect(self.del_)
+        self.readLayout.addWidget(self.deleteButton)
 
     def changeLayout(self):
         self.clear_layout(self.layout())
@@ -110,11 +115,14 @@ class QDataWidget(QWidget):
         HANDLE.create_new_transaction(transaction(self.prevVariables[-1], self.prevVariables[2], newRecordData[1], newRecordData[0]))
         self.variables = self.prevVariables
 
-    def __del__(self, layout):
+    def del_(self):
         HANDLE = SQL_SINGLE_INSTANCE()
-        idOfOther = HANDLE.cursor.execute(f"SELECT idOfOther FROM people WHERE personName = '{self.variables[0]}'")
-        idCategory = HANDLE.cursor.execute(f"SELECT idCategory FROM categories WHERE name = '{self.variables[1]}'")
-        HANDLE.cursor.execute(f"DELETE TOP(1) FROM transactions WHERE idCategory = {idCategory} AND idOfOther = {idOfOther} AND date = {self.variables[-1]} AND money = {self.variables[-2]}")
+        idOfOther = HANDLE.cursor.execute(f"SELECT idOfOther FROM people WHERE personName = '{self.variables[0]}'").fetchall()[0][0]
+        idCategory = HANDLE.cursor.execute(f"SELECT idCategory FROM categories WHERE name = '{self.variables[1]}'").fetchall()[0][0]
+        print(f"SELECT * FROM transactions WHERE idCategory =  {idCategory} AND idOfOther = {idOfOther} AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1;")
+        #HANDLE.cursor.execute(f"DELETE FROM transactions WHERE idCategory IN ( SELECT idCategory FROM transactions WHERE idCategory =  '{idCategory}' AND idOfOther = '{idOfOther}' AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1);")
+        HANDLE.connection.commit()
+        self.deleted.emit()
 
     def clear_layout(self, layout):
         self.prevVariables = []

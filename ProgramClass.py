@@ -39,7 +39,6 @@ class CORE(SQL_SINGLE_INSTANCE):
              command  = "SELECT people.personName, categories.name, transactions.money, transactions.date FROM transactions LEFT JOIN categories ON transactions.idCategory = categories.idCategory LEFT JOIN people ON transactions.idOfOther = people.idOfOther "
         command += f" ORDER BY {self.orderFilters[:-4]} COLLATE NOCASE {self.orderFilters[-4:]} "
 
-        print(command, self.filters)
         self.cursor.execute(command)
         self.shownContent = self.cursor.fetchall()
     def show_graph() -> None: 
@@ -219,6 +218,7 @@ class Program(CORE, QWidget):
                 placeholder = QDataWidget(record, colors[record[1]])
                 placeholder.setStyleSheet(style)
                 placeholder.dataChanged.connect(self.refresh)
+                placeholder.deleted.connect(self.refresh)
                 dataLayout.addWidget(placeholder)
         # widget for the stats of the user 
         self.statWidget = QInfoWidget(self.shownContent, colors)
