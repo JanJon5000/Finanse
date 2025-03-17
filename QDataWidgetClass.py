@@ -119,8 +119,13 @@ class QDataWidget(QWidget):
         HANDLE = SQL_SINGLE_INSTANCE()
         idOfOther = HANDLE.cursor.execute(f"SELECT idOfOther FROM people WHERE personName = '{self.variables[0]}'").fetchall()[0][0]
         idCategory = HANDLE.cursor.execute(f"SELECT idCategory FROM categories WHERE name = '{self.variables[1]}'").fetchall()[0][0]
-        print(f"SELECT * FROM transactions WHERE idCategory =  {idCategory} AND idOfOther = {idOfOther} AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1;")
-        #HANDLE.cursor.execute(f"DELETE FROM transactions WHERE idCategory IN ( SELECT idCategory FROM transactions WHERE idCategory =  '{idCategory}' AND idOfOther = '{idOfOther}' AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1);")
+        
+        HANDLE.cursor.execute(f"""DELETE FROM transactions 
+                              WHERE idCategory IN ( SELECT idCategory FROM transactions WHERE idCategory =  '{idCategory}' AND idOfOther = '{idOfOther}' AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1)
+                              AND IdOfOther IN ( SELECT idOfOther FROM transactions WHERE idCategory =  '{idCategory}' AND idOfOther = '{idOfOther}' AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1)
+                              AND date IN ( SELECT date FROM transactions WHERE idCategory =  '{idCategory}' AND idOfOther = '{idOfOther}' AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1)
+                              AND money IN ( SELECT money FROM transactions WHERE idCategory =  '{idCategory}' AND idOfOther = '{idOfOther}' AND date = '{self.variables[-1]}' AND money = {self.variables[-2]} LIMIT 1)
+                              ;""")
         HANDLE.connection.commit()
         self.deleted.emit()
 
