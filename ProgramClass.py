@@ -1,7 +1,7 @@
 import sqlite3 as sql
 from datetime import date, datetime
 from PyQt5.QtCore import QRect, QPropertyAnimation, QSize, QPoint, QDate
-from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QMessageBox, QCalendarWidget, QComboBox, QListWidget, QListWidgetItem, QHBoxLayout, QDateEdit, QScrollArea
+from PyQt5.QtWidgets import QLineEdit ,QPushButton ,QVBoxLayout, QWidget, QLabel, QGridLayout, QHBoxLayout, QDateEdit, QScrollArea
 from fundamentalClasses import SQL_SINGLE_INSTANCE, transaction, person, category
 from QAddBoxClass import QAddBoxWidget
 from QFilteringWidgets import QFTLFilter, QListFilter, QFromToFilter

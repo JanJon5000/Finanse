@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QSizePolicy, QVBoxLayout, QDateEdit, QLabel, QPushButton, QHBoxLayout
-from PyQt5.QtCore import QDate, Qt, pyqtSignal  
-from PyQt5.QtGui import QFocusEvent, QMouseEvent, QPen, QPainter, QColor, QDoubleValidator
+from PyQt5.QtWidgets import QWidget, QGridLayout, QScrollArea, QListWidget, QLineEdit, QComboBox, QVBoxLayout, QDateEdit, QLabel
+from PyQt5.QtCore import Qt  
+from PyQt5.QtGui import QPen, QPainter, QColor, QDoubleValidator
 from datetime import date
 
 class QListFilter(QWidget):

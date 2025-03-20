@@ -1,8 +1,6 @@
-from PyQt5.QtCore import Qt, QStringListModel, QLocale, pyqtSignal, QDate, QRect
-from PyQt5.QtGui import QPainter, QColor
-from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QScrollArea, QListWidget, QLabel, QCalendarWidget, QCheckBox, QCompleter, QDialog, QSlider, QVBoxLayout
+from PyQt5.QtCore import QStringListModel, QLocale, pyqtSignal
+from PyQt5.QtWidgets import QLineEdit ,QPushButton, QWidget, QGridLayout, QLabel, QCalendarWidget, QCompleter, QDialog
 from fundamentalClasses import SQL_SINGLE_INSTANCE, person, transaction, category
-import traceback
 from datetime import date
 from random import randint
 
@@ -17,7 +15,7 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
     def populateGrid(self):
         # Constructors of the objects
         self.accessibleLayout = QGridLayout(self)
-        self.innerLayout = QGridLayout(self)
+        self.innerLayout = QGridLayout()
         self.qButtonPart = QPushButton("dodaj", self)
         self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota')]
         self.qInteractiveComps = [QLineEdit(self), QLineEdit(self), QLineEdit(self), QCalendarWidget(self)]
