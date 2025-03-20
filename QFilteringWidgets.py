@@ -5,7 +5,6 @@ from datetime import date
 
 class QListFilter(QWidget):
     def __init__(self, qListValues) -> None:
-        # initializer of the parent class
         super().__init__()
         self.qScrollPart = QScrollArea(self)
         self.content = [str(i) for i in qListValues]

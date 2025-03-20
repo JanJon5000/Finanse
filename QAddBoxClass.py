@@ -5,6 +5,8 @@ from datetime import date
 from random import randint
 
 class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
+    # signal that is emited when dialog window is close
+    # so that the program class can act on it and create transactions/categories/recipients
     closed = pyqtSignal()
     def __init__(self, parent=None) -> None:
         super().__init__()
@@ -13,39 +15,37 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         self.populateGrid()
     
     def populateGrid(self):
-        # Constructors of the objects
         self.accessibleLayout = QGridLayout(self)
         self.innerLayout = QGridLayout()
         self.qButtonPart = QPushButton("dodaj", self)
         self.qLabels = [QLabel(text, self) for text in ('imie', 'kategoria', 'kwota')]
         self.qInteractiveComps = [QLineEdit(self), QLineEdit(self), QLineEdit(self), QCalendarWidget(self)]
 
-        # setup of the interactive elements in the widget:
-
         ########### QLINEEDITS
-        # making a list of completers for every QlineEdit box
-        # suggestion list:
+        # suggestions(completers) - list of suggested words for every interactive text field in the widget
+        # in case the user wants to add a transaction with already existing category/recipient/sender
+        # of said money
         self.setCompleters()
 
-        ########### QBUTTON
         self.qButtonPart.clicked.connect(self.on_click_button)
-        ########### QCALLENDAR
+        # parameters of callendar - language, headers  and grid
         self.qInteractiveComps[-1].setGridVisible(True)
         self.qInteractiveComps[-1].setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         self.qInteractiveComps[-1].setLocale(QLocale(QLocale.Polish))
+
         with open('styleSHEETS/callendar-stylesheet.qss', 'r') as file:
             self.qInteractiveComps[-1].setStyleSheet(file.read())
-        # setup inner of the layout
+        # setup inner of the layout (with interactive elements - text fields and their labels)
         for i in range(3):
             self.innerLayout.addWidget(self.qLabels[i], i, 0)  
             self.innerLayout.addWidget(self.qInteractiveComps[i], i, 1)
         self.innerLayout.setContentsMargins(5, 5, 5, 5)
         self.innerLayout.setHorizontalSpacing(5)
         self.innerLayout.setVerticalSpacing(5)
-        # inner widget with smaller elements
+        # inner widget with those interactive elements
         self.innerWidget = QWidget()
         self.innerWidget.setLayout(self.innerLayout)
-        # setup of the outer layout
+        # setup of the outer layout - callendar + smaller widget + button
         self.accessibleLayout.addWidget(self.innerWidget, 0, 0)
         self.accessibleLayout.addWidget(self.qInteractiveComps[-1], 0, 1)
         self.accessibleLayout.addWidget(self.qButtonPart, 1, 0, 1, 2)
@@ -99,10 +99,11 @@ class QAddBoxWidget(QDialog, SQL_SINGLE_INSTANCE):
         for (value, table) in [('personName', 'people'), ('name', 'categories')]:
             self.cursor.execute(f"SELECT {value} FROM {table} WHERE 1=1")
             data = self.cursor.fetchall()
+            
             self.suggestions.append([''.join(tpl) for tpl in data])
         # models with ques on what categories/people there are in the database
         self.models = [QStringListModel(self.suggestions[i], self) for i in range(len(self.suggestions))]
-        # compeleters - objects giving hints in the qlineedit boxes
+        # compeleters - objects giving hints in the qlineedit boxes (corresponding to interactive text fields)
         self.completers = [QCompleter(self.models[i], self) for i in range(len(self.models))]
         for i in range(len(self.completers)): 
             self.completers[i].setCaseSensitivity(False)
