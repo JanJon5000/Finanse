@@ -1,1 +1,5 @@
 # Finance Organizer
+My personal Finance Manager is a simple and effective application for tracking your finances. Built using Python and PyQt5, it allows users to manualy log income and expenses, categorize transactions, and visualize financial data through pie charts and a bar graph. Each transaction includes details such as amount, category, and the other party involved, making it easy to track where money is coming from and where it’s going. Positive values indicate income, while negative values represent expenses.
+
+The app features an intuitive, user-friendly interface powered by PyQt5, ensuring smooth navigation and a seamless experience. Users can enter transactions quickly and efficiently and view them in a structured format. The visualization tools, built using PyQtGraph tools, provide a clear breakdown of financial data, making it easy to spot trends and manage money more effectively. Under the hood, the application relies on SQLite (or an alternative storage solution) to maintain transaction records persistently. The combination of Python and PyQt5 ensures a reliable and visually engaging financial tracking experience.
+
