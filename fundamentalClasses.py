@@ -1,7 +1,7 @@
 import sqlite3 as sql
 from datetime import date
 
-# classes which provide better handling of data from the database (data in the database has exact same syntax)
+# virtual classes which provide better handling of data from the database (data in the database has exact same syntax)
 # objects with every atribute of a transaction from the database...
 class transaction():
     def __init__(self, date: date, money: float, idcategry: int, idoftheother: int) -> None:
