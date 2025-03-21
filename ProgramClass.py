@@ -68,7 +68,7 @@ class Program(CORE, QWidget):
         self.mainGrid = QGridLayout()
         self.populate_grid()
        
-        self.setGeometry(100, 100, self.settings["width"], self.settings["height"])
+        self.setGeometry(0, 0, self.settings["width"], self.settings["height"])
         self.show()
 
     #function cleaning the grid
@@ -235,61 +235,66 @@ class Program(CORE, QWidget):
         self.setLayout(self.mainGrid)
 
     def refresh(self) -> None:
-        self.clear_layout(self.mainGrid)
-        self.filters = dict()
-        self.orderFilters = self.orderContent
-        for key in list(self.filterContents.keys()):
-            if len(self.filterContents[key]) != 0:
-                if (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 0:
-                    if isinstance(self.filterContents[key][1][0], QDate):
-                        
-                        self.cursor.execute('SELECT date FROM transactions WHERE 1=1')
-                        dates = self.cursor.fetchall()
-                        dates = [max(dates), min(dates)]
-                        self.filters[key] = ''
-                        if self.filterContents[key][2] == True:
-                            continue
-                        if self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d') != dates[1]:
-                            self.filters[key] += f" {key} >= '{self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d')}' "
-                        if self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d') != dates[0]:
-                            if self.filters[key] != '':
-                                self.filters[key] += " AND "
-                            self.filters[key] += f" {key} <= '{self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d')}' "
+        try:
+            self.clear_layout(self.mainGrid)
+            self.filters = dict()
+            self.orderFilters = self.orderContent
+            for key in list(self.filterContents.keys()):
+                if len(self.filterContents[key]) != 0:
+                    if (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 0:
+                        if isinstance(self.filterContents[key][1][0], QDate):
+                            
+                            self.cursor.execute('SELECT date FROM transactions WHERE 1=1')
+                            dates = self.cursor.fetchall()
+                            dates = [max(dates), min(dates)]
+                            self.filters[key] = ''
+                            if self.filterContents[key][2] == True:
+                                continue
+                            if self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d') != dates[1]:
+                                self.filters[key] += f" {key} >= '{self.filterContents[key][1][0].toPyDate().strftime('%Y-%m-%d')}' "
+                            if self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d') != dates[0]:
+                                if self.filters[key] != '':
+                                    self.filters[key] += " AND "
+                                self.filters[key] += f" {key} <= '{self.filterContents[key][1][1].toPyDate().strftime('%Y-%m-%d')}' "
 
-                    elif isinstance(self.filterContents[key][1][0], str):
+                        elif isinstance(self.filterContents[key][1][0], str):
+                            self.filters[key] = ''
+                            try: 
+                                self.filters[key] += f" {key} >= {float(self.filterContents[key][1][0])} "
+                            except:
+                                pass
+                            try:
+                                if self.filters[key] != '': 
+                                    self.filters[key] += ' AND '
+                                self.filters[key] += f" {key} <= {float(self.filterContents[key][1][0])} "
+                            except:
+                                pass
+                    elif (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 1 and len(self.filterContents[key][1]) != 0:
+                        if isinstance(self.filterContents[key][1][0], QDate) or len(self.filterContents[key][1][0].split('-')) > 1:
+                            self.filters[key] = ''
+                            for val in self.filterContents[key][1]:
+                                valDate = datetime.strptime(val, "%Y-%m-%d")
+                                self.filters[key] += f" {key} = '{valDate.strftime('%Y-%m-%d')}' "
+                                if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
+                                    self.filters[key] += " OR "
+                        elif isinstance(self.filterContents[key][1][0], str):
+                            self.filters[key] = ''
+                            for val in self.filterContents[key][1]:
+                                self.filters[key] += f" {key} = {float(val)} "
+                                if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
+                                    self.filters[key] += " OR "
+                    else:
                         self.filters[key] = ''
-                        try: 
-                            self.filters[key] += f" {key} >= {float(self.filterContents[key][1][0])} "
-                        except:
-                            pass
-                        try:
-                            if self.filters[key] != '': 
-                                self.filters[key] += ' AND '
-                            self.filters[key] += f" {key} <= {float(self.filterContents[key][1][0])} "
-                        except:
-                            pass
-                elif (isinstance(self.filterContents[key][0], bool) or isinstance(self.filterContents[key][0], int)) and self.filterContents[key][0] == 1 and len(self.filterContents[key][1]) != 0:
-                    if isinstance(self.filterContents[key][1][0], QDate) or len(self.filterContents[key][1][0].split('-')) > 1:
-                        self.filters[key] = ''
-                        for val in self.filterContents[key][1]:
-                            valDate = datetime.strptime(val, "%Y-%m-%d")
-                            self.filters[key] += f" {key} = '{valDate.strftime('%Y-%m-%d')}' "
-                            if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
+                        for val in self.filterContents[key]:
+                            self.filters[key] += f" {key} = '{val}' "
+                            if self.filterContents[key].index(val) != len(self.filterContents[key])-1:
                                 self.filters[key] += " OR "
-                    elif isinstance(self.filterContents[key][1][0], str):
-                        self.filters[key] = ''
-                        for val in self.filterContents[key][1]:
-                            self.filters[key] += f" {key} = {float(val)} "
-                            if self.filterContents[key][1].index(val) != len(self.filterContents[key][1])-1:
-                                self.filters[key] += " OR "
-                else:
-                    self.filters[key] = ''
-                    for val in self.filterContents[key]:
-                        self.filters[key] += f" {key} = '{val}' "
-                        if self.filterContents[key].index(val) != len(self.filterContents[key])-1:
-                            self.filters[key] += " OR "
-        self.populate_grid()
-        self.update()
+            self.populate_grid()
+            self.update()
+        except ValueError:
+            self.clear_layout(self.mainGrid)
+            self.populate_grid()
+            self.update()
 
     def reset(self):
         self.clear_layout(self.mainGrid)
@@ -318,7 +323,7 @@ class Program(CORE, QWidget):
         button_geometry = self.adderButton.geometry()
         global_button_pos = self.adderButton.mapToGlobal(QPoint(0, self.adderButton.height()))
         self.dialog.setMinimumSize(1, 1)
-        self.dialog.setGeometry(QRect(global_button_pos.x(), global_button_pos.y() + button_geometry.y(), 1, 1))
+        self.dialog.setGeometry(QRect(global_button_pos.x() - 900, global_button_pos.y() + button_geometry.y(), 1, 1))
         self.dialog.closed.connect(self.refresh)
 
         self.animation = QPropertyAnimation(self.dialog, b"size")

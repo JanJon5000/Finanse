@@ -71,6 +71,7 @@ class QDataWidget(QWidget):
             x.clicked.connect(self.dataChanged.emit)
             self.readLayout.addWidget(x)
         self.deleteButton = QPushButton("Usun")
+        self.deleteButton.setStyleSheet("background-color: rgb(255, 0, 0);")
         self.deleteButton.clicked.connect(self.del_)
         self.readLayout.addWidget(self.deleteButton)
 
